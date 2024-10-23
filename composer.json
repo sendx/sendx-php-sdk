@@ -1,0 +1,43 @@
+{
+    "name": "sendx/sendx-php-sdk",
+    "version": "1.0.0",
+    "description": "# Introduction SendX is an email marketing product. It helps you convert website visitors to customers, send them promotional emails, engage with them using drip sequences and craft custom journeys using powerful but simple automations. The SendX API is organized around REST. Our API has predictable resource-oriented URLs, accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs. The SendX Rest API doesn’t support bulk updates. You can work on only one object per request. <br>",
+    "keywords": [
+        "php",
+        "sdk",
+        "rest",
+        "api",
+        "email",
+        "marketing",
+        "email_marketing",
+        "sendx",
+        "backend",
+        "tool"
+    ],
+    "homepage": "https://sendx.io",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "SendX",
+            "homepage": "https://sendx.io"
+        }
+    ],
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-mbstring": "*",
+        "guzzlehttp/guzzle": "^7.3",
+        "guzzlehttp/psr7": "^1.7 || ^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0 || ^9.0",
+        "friendsofphp/php-cs-fixer": "^3.5"
+    },
+    "autoload": {
+        "psr-4": { "sendx\\" : "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "sendx\\Test\\" : "test/" }
+    }
+}
