@@ -54,26 +54,32 @@ Please follow the [installation procedure](#installation--usage) and then run th
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-
 // Configure API key authorization: apiKeyAuth
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
 
 
-$apiInstance = new sendx\Api\CampaignApi(
+$apiInstance = new sendx\Api\ContactApi(
     // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
     // This is optional, `GuzzleHttp\Client` will be used as default.
     new GuzzleHttp\Client(),
     $config
 );
-$campaign_request = new \sendx\model\CampaignRequest(); // \sendx\model\CampaignRequest | The campaign content
+$contact_request = new \sendx\model\ContactRequest(); // \sendx\model\ContactRequest
+$contact_request->setEmail("john@doe.com"); // Required: Set email
+$contact_request->setFirstName("John"); // Optional: Set first name
+$contact_request->setLastName("Doe"); // Optional: Set last name
+$contact_request->setCompany("SendX"); // Optional: Set company
+$contact_request->setLastTrackedIp("192.168.1.1"); // Optional: Set last tracked IP
+$contact_request->setCustomFields(["sendf13kn2k3kjm2d" => "Developer", "ckjsnck234nm2kn42" => "Engineering"]); // Optional: Set custom fields
+$contact_request->setLists(["list_id_1", "list_id_2"]); // Optional: Subscribe to lists
 
 try {
-    $result = $apiInstance->createCampaign($campaign_request);
+    $result = $apiInstance->createContact($contact_request);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling CampaignApi->createCampaign: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling ContactApi->createContact: ', $e->getMessage(), PHP_EOL;
 }
 
 ```
