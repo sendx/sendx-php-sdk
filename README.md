@@ -1,4 +1,4 @@
-# SendX PHP SDK
+# [SendX PHP SDK](https://packagist.org/packages/sendx.io/sendx-php-sdk)
 
 ## Introduction 
 
@@ -18,20 +18,19 @@ Should also work with PHP 8.0.
 
 ### Composer
 
-To install the bindings via [Composer](https://getcomposer.org/), add the following to `composer.json`:
+To install the bindings via [Composer](https://getcomposer.org/), use the following command on the command line:
+
+```shell
+composer require sendx.io/sendx-php-sdk
+```
+
+Or, add the following to `composer.json`:
 
 ```json
-{
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/sendx/sendx-php-sdk.git"
-    }
-  ],
+
   "require": {
-    "sendx/sendx-php-sdk": "*@dev"
+      "sendx.io/sendx-php-sdk": "1.0.0"
   }
-}
 ```
 
 Then run `composer install`
