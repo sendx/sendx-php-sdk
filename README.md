@@ -1,4 +1,4 @@
-# [SendX PHP SDK](https://packagist.org/packages/sendx.io/sendx-php-sdk)
+# [SendX PHP SDK](https://packagist.org/packages/sendx/sendx-php-sdk)
 
 ## Introduction 
 
@@ -21,7 +21,7 @@ Should also work with PHP 8.0.
 To install the bindings via [Composer](https://getcomposer.org/), use the following command on the command line:
 
 ```shell
-composer require sendx.io/sendx-php-sdk
+composer require sendx/sendx-php-sdk
 ```
 
 Or, add the following to `composer.json`:
@@ -29,7 +29,7 @@ Or, add the following to `composer.json`:
 ```json
 
   "require": {
-      "sendx.io/sendx-php-sdk": "1.0.0"
+      "sendx/sendx-php-sdk": "1.0.0"
   }
 ```
 

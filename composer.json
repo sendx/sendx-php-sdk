@@ -1,5 +1,5 @@
 {
-    "name": "sendx.io/sendx-php-sdk",
+    "name": "sendx/sendx-php-sdk",
     "description": "SendX is an email marketing product. It helps you convert website visitors to customers, send them promotional emails, engage with them using drip sequences and craft custom journeys using powerful but simple automations.",
     "keywords": [
         "php",
