@@ -53,6 +53,7 @@ Please follow the [installation procedure](#installation--usage) and then run th
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
+
 // Configure API key authorization: apiKeyAuth
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
@@ -95,11 +96,15 @@ Class | Method | HTTP request | Description
 *CampaignApi* | [**getAllCampaigns**](docs/Api/CampaignApi.md#getallcampaigns) | **GET** /campaign | Get All Campaigns
 *CampaignApi* | [**getCampaignById**](docs/Api/CampaignApi.md#getcampaignbyid) | **GET** /campaign/{campaignId} | Get Campaign By Id
 *ContactApi* | [**createContact**](docs/Api/ContactApi.md#createcontact) | **POST** /contact | Create a contact
-*ContactApi* | [**deleteContact**](docs/Api/ContactApi.md#deletecontact) | **DELETE** /contact/{contactId} | Delete Contact
+*ContactApi* | [**deleteContact**](docs/Api/ContactApi.md#deletecontact) | **DELETE** /contact/{identifier} | Delete Contact
 *ContactApi* | [**getAllContacts**](docs/Api/ContactApi.md#getallcontacts) | **GET** /contact | Get All Contacts
-*ContactApi* | [**getContactById**](docs/Api/ContactApi.md#getcontactbyid) | **GET** /contact/{contactId} | Get Contact by ID
-*ContactApi* | [**unsubscribeContact**](docs/Api/ContactApi.md#unsubscribecontact) | **POST** /contact/unsubscribe/{contactId} | Unsubscribe Contact
-*ContactApi* | [**updateContact**](docs/Api/ContactApi.md#updatecontact) | **PUT** /contact/{contactId} | Update Contact
+*ContactApi* | [**getContactById**](docs/Api/ContactApi.md#getcontactbyid) | **GET** /contact/{identifier} | Get Contact by Identifier
+*ContactApi* | [**unsubscribeContact**](docs/Api/ContactApi.md#unsubscribecontact) | **POST** /contact/unsubscribe/{identifier} | Unsubscribe Contact
+*ContactApi* | [**updateContact**](docs/Api/ContactApi.md#updatecontact) | **PUT** /contact/{identifier} | Update Contact
+*EventApi* | [**createRevenueEvent**](docs/Api/EventApi.md#createrevenueevent) | **POST** /events/revenue | Record a revenue event for a specific contact
+*EventApi* | [**pushCustomEvent**](docs/Api/EventApi.md#pushcustomevent) | **POST** /events/custom | Push a custom event associated with a contact
+*GettingStartedApi* | [**identifyContact**](docs/Api/GettingStartedApi.md#identifycontact) | **POST** /contact/identify | Identify contact
+*GettingStartedApi* | [**trackingContact**](docs/Api/GettingStartedApi.md#trackingcontact) | **POST** /contact/track | Add Tracking info
 *ListApi* | [**createList**](docs/Api/ListApi.md#createlist) | **POST** /list | Create List
 *ListApi* | [**deleteList**](docs/Api/ListApi.md#deletelist) | **DELETE** /list/{listId} | Delete List
 *ListApi* | [**getAllLists**](docs/Api/ListApi.md#getalllists) | **GET** /list | Get All Lists
@@ -122,20 +127,27 @@ Class | Method | HTTP request | Description
 - [Contact](docs/Model/Contact.md)
 - [ContactRequest](docs/Model/ContactRequest.md)
 - [CreateResponse](docs/Model/CreateResponse.md)
+- [CustomEventRequest](docs/Model/CustomEventRequest.md)
 - [DashboardStats](docs/Model/DashboardStats.md)
 - [DeleteCampaign200Response](docs/Model/DeleteCampaign200Response.md)
 - [DeleteRequest](docs/Model/DeleteRequest.md)
 - [DeleteResponse](docs/Model/DeleteResponse.md)
+- [EventResponse](docs/Model/EventResponse.md)
+- [IdentifyRequest](docs/Model/IdentifyRequest.md)
+- [IdentifyResponse](docs/Model/IdentifyResponse.md)
 - [LastSentCampaignStat](docs/Model/LastSentCampaignStat.md)
 - [ListModel](docs/Model/ListModel.md)
 - [ListRequest](docs/Model/ListRequest.md)
 - [ReportData](docs/Model/ReportData.md)
 - [Response](docs/Model/Response.md)
+- [RevenueEventRequest](docs/Model/RevenueEventRequest.md)
 - [Sender](docs/Model/Sender.md)
 - [SenderRequest](docs/Model/SenderRequest.md)
 - [SenderResponse](docs/Model/SenderResponse.md)
 - [Tag](docs/Model/Tag.md)
 - [TagRequest](docs/Model/TagRequest.md)
+- [TrackRequest](docs/Model/TrackRequest.md)
+- [TrackResponse](docs/Model/TrackResponse.md)
 
 ## Authorization
 

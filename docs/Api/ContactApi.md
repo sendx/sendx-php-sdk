@@ -5,11 +5,11 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
 | [**createContact()**](ContactApi.md#createContact) | **POST** /contact | Create a contact |
-| [**deleteContact()**](ContactApi.md#deleteContact) | **DELETE** /contact/{contactId} | Delete Contact |
+| [**deleteContact()**](ContactApi.md#deleteContact) | **DELETE** /contact/{identifier} | Delete Contact |
 | [**getAllContacts()**](ContactApi.md#getAllContacts) | **GET** /contact | Get All Contacts |
-| [**getContactById()**](ContactApi.md#getContactById) | **GET** /contact/{contactId} | Get Contact by ID |
-| [**unsubscribeContact()**](ContactApi.md#unsubscribeContact) | **POST** /contact/unsubscribe/{contactId} | Unsubscribe Contact |
-| [**updateContact()**](ContactApi.md#updateContact) | **PUT** /contact/{contactId} | Update Contact |
+| [**getContactById()**](ContactApi.md#getContactById) | **GET** /contact/{identifier} | Get Contact by Identifier |
+| [**unsubscribeContact()**](ContactApi.md#unsubscribeContact) | **POST** /contact/unsubscribe/{identifier} | Unsubscribe Contact |
+| [**updateContact()**](ContactApi.md#updateContact) | **PUT** /contact/{identifier} | Update Contact |
 
 
 ## `createContact()`
@@ -77,7 +77,7 @@ try {
 ## `deleteContact()`
 
 ```php
-deleteContact($contact_id): \sendx\model\Response
+deleteContact($identifier): \sendx\model\Response
 ```
 
 Delete Contact
@@ -103,10 +103,10 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$contact_id = 'contact_id_example'; // string | The Contact ID to delete
+$identifier = 'identifier_example'; // string | The Contact ID/ Email to delete
 
 try {
-    $result = $apiInstance->deleteContact($contact_id);
+    $result = $apiInstance->deleteContact($identifier);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ContactApi->deleteContact: ', $e->getMessage(), PHP_EOL;
@@ -117,7 +117,7 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **contact_id** | **string**| The Contact ID to delete | |
+| **identifier** | **string**| The Contact ID/ Email to delete | |
 
 ### Return type
 
@@ -207,12 +207,12 @@ try {
 ## `getContactById()`
 
 ```php
-getContactById($contact_id): \sendx\model\Contact
+getContactById($identifier): \sendx\model\Contact
 ```
 
-Get Contact by ID
+Get Contact by Identifier
 
-Retrieve a specific contact by its contactId.
+Retrieve a specific contact by its identifier.
 
 ### Example
 
@@ -233,10 +233,10 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$contact_id = sendxid123; // string | The ID of the contact to retrieve.
+$identifier = john@doe.com; // string | The ID or Email of the contact to retrieve.
 
 try {
-    $result = $apiInstance->getContactById($contact_id);
+    $result = $apiInstance->getContactById($identifier);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ContactApi->getContactById: ', $e->getMessage(), PHP_EOL;
@@ -247,7 +247,7 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **contact_id** | **string**| The ID of the contact to retrieve. | |
+| **identifier** | **string**| The ID or Email of the contact to retrieve. | |
 
 ### Return type
 
@@ -269,7 +269,7 @@ try {
 ## `unsubscribeContact()`
 
 ```php
-unsubscribeContact($contact_id): \sendx\model\Response
+unsubscribeContact($identifier): \sendx\model\Response
 ```
 
 Unsubscribe Contact
@@ -295,10 +295,10 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$contact_id = sendx123; // string | The Contact ID to unsubscribe
+$identifier = sendx123; // string | The Contact ID or email to unsubscribe
 
 try {
-    $result = $apiInstance->unsubscribeContact($contact_id);
+    $result = $apiInstance->unsubscribeContact($identifier);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ContactApi->unsubscribeContact: ', $e->getMessage(), PHP_EOL;
@@ -309,7 +309,7 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **contact_id** | **string**| The Contact ID to unsubscribe | |
+| **identifier** | **string**| The Contact ID or email to unsubscribe | |
 
 ### Return type
 
@@ -331,7 +331,7 @@ try {
 ## `updateContact()`
 
 ```php
-updateContact($contact_request, $contact_id): \sendx\model\Contact
+updateContact($contact_request, $identifier): \sendx\model\Contact
 ```
 
 Update Contact
@@ -358,10 +358,10 @@ $apiInstance = new sendx\Api\ContactApi(
     $config
 );
 $contact_request = new \sendx\model\ContactRequest(); // \sendx\model\ContactRequest
-$contact_id = sendxid123; // string | The ID of the Contact to update
+$identifier = sendxid123; // string | The ID or email of the Contact to update
 
 try {
-    $result = $apiInstance->updateContact($contact_request, $contact_id);
+    $result = $apiInstance->updateContact($contact_request, $identifier);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ContactApi->updateContact: ', $e->getMessage(), PHP_EOL;
@@ -373,7 +373,7 @@ try {
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
 | **contact_request** | [**\sendx\model\ContactRequest**](../Model/ContactRequest.md)|  | |
-| **contact_id** | **string**| The ID of the Contact to update | |
+| **identifier** | **string**| The ID or email of the Contact to update | |
 
 ### Return type
 
