@@ -5,10 +5,10 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
 | [**createTag()**](TagsApi.md#createTag) | **POST** /tag | Create a Tag |
-| [**deleteTag()**](TagsApi.md#deleteTag) | **DELETE** /tag/{tagId} | Delete a Tag |
+| [**deleteTag()**](TagsApi.md#deleteTag) | **DELETE** /tag/{tagId} | Delete Tag |
 | [**getAllTags()**](TagsApi.md#getAllTags) | **GET** /tag | Get All Tags |
-| [**getTagById()**](TagsApi.md#getTagById) | **GET** /tag/{tagId} | Get a Tag by ID |
-| [**updateTag()**](TagsApi.md#updateTag) | **PUT** /tag/{tagId} | Update a Tag |
+| [**getTagById()**](TagsApi.md#getTagById) | **GET** /tag/{tagId} | Get Tag |
+| [**updateTag()**](TagsApi.md#updateTag) | **PUT** /tag/{tagId} | Update Tag |
 
 
 ## `createTag()`
@@ -79,7 +79,7 @@ try {
 deleteTag($tag_id): \sendx\model\DeleteResponse
 ```
 
-Delete a Tag
+Delete Tag
 
 Delete an existing tag by ID
 
@@ -207,7 +207,7 @@ try {
 getTagById($tag_id): \sendx\model\Tag
 ```
 
-Get a Tag by ID
+Get Tag
 
 Retrieve a tag based on the provided tag ID
 
@@ -269,7 +269,7 @@ try {
 updateTag($tag_request, $tag_id): \sendx\model\Response
 ```
 
-Update a Tag
+Update Tag
 
 Update an existing tag
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * CampaignApi
- * PHP version 7.4
+ * PHP version 8.1
  *
  * @category Class
  * @package  sendx
@@ -12,12 +12,12 @@
 /**
  * SendX REST API
  *
- * # Introduction SendX is an email marketing product. It helps you convert website visitors to customers, send them promotional emails, engage with them using drip sequences and craft custom journeys using powerful but simple automations. The SendX API is organized around REST. Our API has predictable resource-oriented URLs, accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs. The SendX Rest API doesn’t support bulk updates. You can work on only one object per request. <br>
+ * # SendX REST API Documentation  ## 🚀 Introduction  The SendX API is organized around REST principles. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.  **Key Features:** - 🔒 **Security**: Team-based authentication with optional member-level access - 🎯 **Resource-Oriented**: RESTful design with clear resource boundaries - 📊 **Rich Data Models**: Three-layer model system (Input/Output/Internal) - 🔗 **Relationships**: Automatic prefix handling for resource relationships - 📈 **Scalable**: Built for high-volume email marketing operations  ## 🏗️ Architecture Overview  SendX uses a three-layer model architecture:  1. **Input Models** (`RestE*`): For API requests 2. **Output Models** (`RestR*`): For API responses with prefixed IDs 3. **Internal Models**: Core business logic (not exposed in API)  ## 🔐 Security & Authentication  SendX uses API key authentication:  ### Team API Key ```http X-Team-ApiKey: YOUR_TEAM_API_KEY ``` - **Required for all requests** - Team-level access to resources - Available in SendX Settings → Team API Key  ## 🆔 Encrypted ID System  SendX uses encrypted IDs for security and better developer experience:  - **Internal IDs**: Sequential integers (not exposed) - **Encrypted IDs**: 22-character alphanumeric strings - **Prefixed IDs**: Resource-type prefixes in API responses (`contact_<22-char-id>`)  ### ID Format  **All resource IDs follow this pattern:** ``` <resource_prefix>_<22_character_alphanumeric_string> ```  **Example:** ```json {   \"id\": \"contact_BnKjkbBBS500CoBCP0oChQ\",   \"lists\": [\"list_OcuxJHdiAvujmwQVJfd3ss\", \"list_0tOFLp5RgV7s3LNiHrjGYs\"],   \"tags\": [\"tag_UhsDkjL772Qbj5lWtT62VK\", \"tag_fL7t9lsnZ9swvx2HrtQ9wM\"] } ```  ## 📚 Resource Prefixes  | Resource | Prefix | Example | |----------|--------|---------| | Contact | `contact_` | `contact_BnKjkbBBS500CoBCP0oChQ` | | Campaign | `campaign_` | `campaign_LUE9BTxmksSmqHWbh96zsn` | | List | `list_` | `list_OcuxJHdiAvujmwQVJfd3ss` | | Tag | `tag_` | `tag_UhsDkjL772Qbj5lWtT62VK` | | Sender | `sender_` | `sender_4vK3WFhMgvOwUNyaL4QxCD` | | Template | `template_` | `template_f3lJvTEhSjKGVb5Lwc5SWS` | | Custom Field | `field_` | `field_MnuqBAG2NPLm7PZMWbjQxt` | | Webhook | `webhook_` | `webhook_9l154iiXlZoPo7vngmamee` | | Post | `post_` | `post_XyZ123aBc456DeF789GhI` | | Post Category | `post_category_` | `post_category_YzS1wOU20yw87UUHKxMzwn` | | Post Tag | `post_tag_` | `post_tag_123XyZ456AbC` | | Member | `member_` | `member_JkL012MnO345PqR678` |  ## 🎯 Best Practices  ### Error Handling - **Always check status codes**: 2xx = success, 4xx = client error, 5xx = server error - **Read error messages**: Descriptive messages help debug issues - **Handle rate limits**: Respect API rate limits for optimal performance  ### Data Validation - **Email format**: Must be valid email addresses - **Required fields**: Check documentation for mandatory fields - **Field lengths**: Respect maximum length constraints  ### Performance - **Pagination**: Use offset/limit for large datasets - **Batch operations**: Process multiple items when supported - **Caching**: Cache responses when appropriate  ## 🛠️ SDKs & Integration  Official SDKs available for: - [Golang](https://github.com/sendx/sendx-go-sdk) - [Python](https://github.com/sendx/sendx-python-sdk) - [Ruby](https://github.com/sendx/sendx-ruby-sdk) - [Java](https://github.com/sendx/sendx-java-sdk) - [PHP](https://github.com/sendx/sendx-php-sdk) - [JavaScript](https://github.com/sendx/sendx-javascript-sdk)  ## 📞 Support  Need help? Contact us: - 💬 **Website Chat**: Available on sendx.io - 📧 **Email**: hello@sendx.io - 📚 **Documentation**: Full guides at help.sendx.io  ---  **API Endpoint:** `https://api.sendx.io/api/v1/rest`  [<img src=\"https://run.pstmn.io/button.svg\" alt=\"Run In Postman\" style=\"width: 128px; height: 32px;\">](https://god.gw.postman.com/run-collection/33476323-44b198b0-5219-4619-a01f-cfc24d573885?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D33476323-44b198b0-5219-4619-a01f-cfc24d573885%26entityType%3Dcollection%26workspaceId%3D6b1e4f65-96a9-4136-9512-6266c852517e)
  *
  * The version of the OpenAPI document: 1.0.0
- * Contact: support@sendx.io
+ * Contact: hello@sendx.io
  * Generated by: https://openapi-generator.tech
- * Generator version: 7.8.0
+ * Generator version: 7.13.0
  */
 
 /**
@@ -35,8 +35,11 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use sendx\ApiException;
 use sendx\Configuration;
+use sendx\FormDataProcessor;
 use sendx\HeaderSelector;
 use sendx\ObjectSerializer;
 
@@ -78,13 +81,10 @@ class CampaignApi
         'deleteCampaign' => [
             'application/json',
         ],
-        'editCampaign' => [
-            'application/json',
-        ],
         'getAllCampaigns' => [
             'application/json',
         ],
-        'getCampaignById' => [
+        'getCampaign' => [
             'application/json',
         ],
     ];
@@ -96,13 +96,13 @@ class CampaignApi
      * @param int             $hostIndex (Optional) host index to select the list of hosts if defined in the OpenAPI spec
      */
     public function __construct(
-        ClientInterface $client = null,
-        Configuration $config = null,
-        HeaderSelector $selector = null,
-        $hostIndex = 0
+        ?ClientInterface $client = null,
+        ?Configuration $config = null,
+        ?HeaderSelector $selector = null,
+        int $hostIndex = 0
     ) {
         $this->client = $client ?: new Client();
-        $this->config = $config ?: new Configuration();
+        $this->config = $config ?: Configuration::getDefaultConfiguration();
         $this->headerSelector = $selector ?: new HeaderSelector();
         $this->hostIndex = $hostIndex;
     }
@@ -138,36 +138,36 @@ class CampaignApi
     /**
      * Operation createCampaign
      *
-     * Create Campaign
+     * Create campaign
      *
-     * @param  \sendx\model\CampaignRequest $campaign_request The campaign content (required)
+     * @param  \sendx\model\RestECampaign $rest_e_campaign rest_e_campaign (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createCampaign'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\CreateResponse
+     * @return \sendx\model\RestRCampaign|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function createCampaign($campaign_request, string $contentType = self::contentTypes['createCampaign'][0])
+    public function createCampaign($rest_e_campaign, string $contentType = self::contentTypes['createCampaign'][0])
     {
-        list($response) = $this->createCampaignWithHttpInfo($campaign_request, $contentType);
+        list($response) = $this->createCampaignWithHttpInfo($rest_e_campaign, $contentType);
         return $response;
     }
 
     /**
      * Operation createCampaignWithHttpInfo
      *
-     * Create Campaign
+     * Create campaign
      *
-     * @param  \sendx\model\CampaignRequest $campaign_request The campaign content (required)
+     * @param  \sendx\model\RestECampaign $rest_e_campaign (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createCampaign'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\CreateResponse, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRCampaign|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function createCampaignWithHttpInfo($campaign_request, string $contentType = self::contentTypes['createCampaign'][0])
+    public function createCampaignWithHttpInfo($rest_e_campaign, string $contentType = self::contentTypes['createCampaign'][0])
     {
-        $request = $this->createCampaignRequest($campaign_request, $contentType);
+        $request = $this->createCampaignRequest($rest_e_campaign, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -191,6 +191,48 @@ class CampaignApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 201:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRCampaign',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 403:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 422:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -204,75 +246,64 @@ class CampaignApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\CreateResponse' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\CreateResponse' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\CreateResponse', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\CreateResponse';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRCampaign',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
-                case 200:
+                case 201:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\CreateResponse',
+                        '\sendx\model\RestRCampaign',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 403:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 422:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -280,17 +311,17 @@ class CampaignApi
     /**
      * Operation createCampaignAsync
      *
-     * Create Campaign
+     * Create campaign
      *
-     * @param  \sendx\model\CampaignRequest $campaign_request The campaign content (required)
+     * @param  \sendx\model\RestECampaign $rest_e_campaign (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createCampaignAsync($campaign_request, string $contentType = self::contentTypes['createCampaign'][0])
+    public function createCampaignAsync($rest_e_campaign, string $contentType = self::contentTypes['createCampaign'][0])
     {
-        return $this->createCampaignAsyncWithHttpInfo($campaign_request, $contentType)
+        return $this->createCampaignAsyncWithHttpInfo($rest_e_campaign, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -301,18 +332,18 @@ class CampaignApi
     /**
      * Operation createCampaignAsyncWithHttpInfo
      *
-     * Create Campaign
+     * Create campaign
      *
-     * @param  \sendx\model\CampaignRequest $campaign_request The campaign content (required)
+     * @param  \sendx\model\RestECampaign $rest_e_campaign (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createCampaignAsyncWithHttpInfo($campaign_request, string $contentType = self::contentTypes['createCampaign'][0])
+    public function createCampaignAsyncWithHttpInfo($rest_e_campaign, string $contentType = self::contentTypes['createCampaign'][0])
     {
-        $returnType = '\sendx\model\CreateResponse';
-        $request = $this->createCampaignRequest($campaign_request, $contentType);
+        $returnType = '\sendx\model\RestRCampaign';
+        $request = $this->createCampaignRequest($rest_e_campaign, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -353,19 +384,19 @@ class CampaignApi
     /**
      * Create request for operation 'createCampaign'
      *
-     * @param  \sendx\model\CampaignRequest $campaign_request The campaign content (required)
+     * @param  \sendx\model\RestECampaign $rest_e_campaign (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function createCampaignRequest($campaign_request, string $contentType = self::contentTypes['createCampaign'][0])
+    public function createCampaignRequest($rest_e_campaign, string $contentType = self::contentTypes['createCampaign'][0])
     {
 
-        // verify the required parameter 'campaign_request' is set
-        if ($campaign_request === null || (is_array($campaign_request) && count($campaign_request) === 0)) {
+        // verify the required parameter 'rest_e_campaign' is set
+        if ($rest_e_campaign === null || (is_array($rest_e_campaign) && count($rest_e_campaign) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $campaign_request when calling createCampaign'
+                'Missing the required parameter $rest_e_campaign when calling createCampaign'
             );
         }
 
@@ -388,12 +419,12 @@ class CampaignApi
         );
 
         // for model (json/xml)
-        if (isset($campaign_request)) {
+        if (isset($rest_e_campaign)) {
             if (stripos($headers['Content-Type'], 'application/json') !== false) {
                 # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($campaign_request));
+                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($rest_e_campaign));
             } else {
-                $httpBody = $campaign_request;
+                $httpBody = $rest_e_campaign;
             }
         } elseif (count($formParams) > 0) {
             if ($multipart) {
@@ -449,36 +480,36 @@ class CampaignApi
     /**
      * Operation deleteCampaign
      *
-     * Delete Campaign
+     * Delete campaign
      *
-     * @param  string $campaign_id The ID of the campaign to delete (required)
+     * @param  string $identifier Campaign identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteCampaign'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\DeleteCampaign200Response
+     * @return \sendx\model\DeleteResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function deleteCampaign($campaign_id, string $contentType = self::contentTypes['deleteCampaign'][0])
+    public function deleteCampaign($identifier, string $contentType = self::contentTypes['deleteCampaign'][0])
     {
-        list($response) = $this->deleteCampaignWithHttpInfo($campaign_id, $contentType);
+        list($response) = $this->deleteCampaignWithHttpInfo($identifier, $contentType);
         return $response;
     }
 
     /**
      * Operation deleteCampaignWithHttpInfo
      *
-     * Delete Campaign
+     * Delete campaign
      *
-     * @param  string $campaign_id The ID of the campaign to delete (required)
+     * @param  string $identifier Campaign identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteCampaign'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\DeleteCampaign200Response, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\DeleteResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function deleteCampaignWithHttpInfo($campaign_id, string $contentType = self::contentTypes['deleteCampaign'][0])
+    public function deleteCampaignWithHttpInfo($identifier, string $contentType = self::contentTypes['deleteCampaign'][0])
     {
-        $request = $this->deleteCampaignRequest($campaign_id, $contentType);
+        $request = $this->deleteCampaignRequest($identifier, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -502,6 +533,42 @@ class CampaignApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\DeleteResponse',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -515,75 +582,56 @@ class CampaignApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\DeleteCampaign200Response' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\DeleteCampaign200Response' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\DeleteCampaign200Response', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\DeleteCampaign200Response';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\DeleteResponse',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\DeleteCampaign200Response',
+                        '\sendx\model\DeleteResponse',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -591,17 +639,17 @@ class CampaignApi
     /**
      * Operation deleteCampaignAsync
      *
-     * Delete Campaign
+     * Delete campaign
      *
-     * @param  string $campaign_id The ID of the campaign to delete (required)
+     * @param  string $identifier Campaign identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function deleteCampaignAsync($campaign_id, string $contentType = self::contentTypes['deleteCampaign'][0])
+    public function deleteCampaignAsync($identifier, string $contentType = self::contentTypes['deleteCampaign'][0])
     {
-        return $this->deleteCampaignAsyncWithHttpInfo($campaign_id, $contentType)
+        return $this->deleteCampaignAsyncWithHttpInfo($identifier, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -612,18 +660,18 @@ class CampaignApi
     /**
      * Operation deleteCampaignAsyncWithHttpInfo
      *
-     * Delete Campaign
+     * Delete campaign
      *
-     * @param  string $campaign_id The ID of the campaign to delete (required)
+     * @param  string $identifier Campaign identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function deleteCampaignAsyncWithHttpInfo($campaign_id, string $contentType = self::contentTypes['deleteCampaign'][0])
+    public function deleteCampaignAsyncWithHttpInfo($identifier, string $contentType = self::contentTypes['deleteCampaign'][0])
     {
-        $returnType = '\sendx\model\DeleteCampaign200Response';
-        $request = $this->deleteCampaignRequest($campaign_id, $contentType);
+        $returnType = '\sendx\model\DeleteResponse';
+        $request = $this->deleteCampaignRequest($identifier, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -664,24 +712,27 @@ class CampaignApi
     /**
      * Create request for operation 'deleteCampaign'
      *
-     * @param  string $campaign_id The ID of the campaign to delete (required)
+     * @param  string $identifier Campaign identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function deleteCampaignRequest($campaign_id, string $contentType = self::contentTypes['deleteCampaign'][0])
+    public function deleteCampaignRequest($identifier, string $contentType = self::contentTypes['deleteCampaign'][0])
     {
 
-        // verify the required parameter 'campaign_id' is set
-        if ($campaign_id === null || (is_array($campaign_id) && count($campaign_id) === 0)) {
+        // verify the required parameter 'identifier' is set
+        if ($identifier === null || (is_array($identifier) && count($identifier) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $campaign_id when calling deleteCampaign'
+                'Missing the required parameter $identifier when calling deleteCampaign'
             );
         }
+        if (!preg_match("/^(campaign_)?[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling CampaignApi.deleteCampaign, must conform to the pattern /^(campaign_)?[a-zA-Z0-9]{22}$/.");
+        }
+        
 
-
-        $resourcePath = '/campaign/{campaignId}';
+        $resourcePath = '/campaign/{identifier}';
         $formParams = [];
         $queryParams = [];
         $headerParams = [];
@@ -691,10 +742,10 @@ class CampaignApi
 
 
         // path params
-        if ($campaign_id !== null) {
+        if ($identifier !== null) {
             $resourcePath = str_replace(
-                '{' . 'campaignId' . '}',
-                ObjectSerializer::toPathValue($campaign_id),
+                '{' . 'identifier' . '}',
+                ObjectSerializer::toPathValue($identifier),
                 $resourcePath
             );
         }
@@ -759,373 +810,42 @@ class CampaignApi
     }
 
     /**
-     * Operation editCampaign
-     *
-     * Edit Campaign
-     *
-     * @param  \sendx\model\CampaignRequest $campaign_request campaign_request (required)
-     * @param  string $campaign_id The ID of the campaign to edit (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['editCampaign'] to see the possible values for this operation
-     *
-     * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
-     * @throws \InvalidArgumentException
-     * @return \sendx\model\Campaign
-     */
-    public function editCampaign($campaign_request, $campaign_id, string $contentType = self::contentTypes['editCampaign'][0])
-    {
-        list($response) = $this->editCampaignWithHttpInfo($campaign_request, $campaign_id, $contentType);
-        return $response;
-    }
-
-    /**
-     * Operation editCampaignWithHttpInfo
-     *
-     * Edit Campaign
-     *
-     * @param  \sendx\model\CampaignRequest $campaign_request (required)
-     * @param  string $campaign_id The ID of the campaign to edit (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['editCampaign'] to see the possible values for this operation
-     *
-     * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
-     * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Campaign, HTTP status code, HTTP response headers (array of strings)
-     */
-    public function editCampaignWithHttpInfo($campaign_request, $campaign_id, string $contentType = self::contentTypes['editCampaign'][0])
-    {
-        $request = $this->editCampaignRequest($campaign_request, $campaign_id, $contentType);
-
-        try {
-            $options = $this->createHttpClientOption();
-            try {
-                $response = $this->client->send($request, $options);
-            } catch (RequestException $e) {
-                throw new ApiException(
-                    "[{$e->getCode()}] {$e->getMessage()}",
-                    (int) $e->getCode(),
-                    $e->getResponse() ? $e->getResponse()->getHeaders() : null,
-                    $e->getResponse() ? (string) $e->getResponse()->getBody() : null
-                );
-            } catch (ConnectException $e) {
-                throw new ApiException(
-                    "[{$e->getCode()}] {$e->getMessage()}",
-                    (int) $e->getCode(),
-                    null,
-                    null
-                );
-            }
-
-            $statusCode = $response->getStatusCode();
-
-            if ($statusCode < 200 || $statusCode > 299) {
-                throw new ApiException(
-                    sprintf(
-                        '[%d] Error connecting to the API (%s)',
-                        $statusCode,
-                        (string) $request->getUri()
-                    ),
-                    $statusCode,
-                    $response->getHeaders(),
-                    (string) $response->getBody()
-                );
-            }
-
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Campaign' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Campaign' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Campaign', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Campaign';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
-        } catch (ApiException $e) {
-            switch ($e->getCode()) {
-                case 200:
-                    $data = ObjectSerializer::deserialize(
-                        $e->getResponseBody(),
-                        '\sendx\model\Campaign',
-                        $e->getResponseHeaders()
-                    );
-                    $e->setResponseObject($data);
-                    break;
-            }
-            throw $e;
-        }
-    }
-
-    /**
-     * Operation editCampaignAsync
-     *
-     * Edit Campaign
-     *
-     * @param  \sendx\model\CampaignRequest $campaign_request (required)
-     * @param  string $campaign_id The ID of the campaign to edit (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['editCampaign'] to see the possible values for this operation
-     *
-     * @throws \InvalidArgumentException
-     * @return \GuzzleHttp\Promise\PromiseInterface
-     */
-    public function editCampaignAsync($campaign_request, $campaign_id, string $contentType = self::contentTypes['editCampaign'][0])
-    {
-        return $this->editCampaignAsyncWithHttpInfo($campaign_request, $campaign_id, $contentType)
-            ->then(
-                function ($response) {
-                    return $response[0];
-                }
-            );
-    }
-
-    /**
-     * Operation editCampaignAsyncWithHttpInfo
-     *
-     * Edit Campaign
-     *
-     * @param  \sendx\model\CampaignRequest $campaign_request (required)
-     * @param  string $campaign_id The ID of the campaign to edit (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['editCampaign'] to see the possible values for this operation
-     *
-     * @throws \InvalidArgumentException
-     * @return \GuzzleHttp\Promise\PromiseInterface
-     */
-    public function editCampaignAsyncWithHttpInfo($campaign_request, $campaign_id, string $contentType = self::contentTypes['editCampaign'][0])
-    {
-        $returnType = '\sendx\model\Campaign';
-        $request = $this->editCampaignRequest($campaign_request, $campaign_id, $contentType);
-
-        return $this->client
-            ->sendAsync($request, $this->createHttpClientOption())
-            ->then(
-                function ($response) use ($returnType) {
-                    if ($returnType === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ($returnType !== 'string') {
-                            $content = json_decode($content);
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, $returnType, []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-                },
-                function ($exception) {
-                    $response = $exception->getResponse();
-                    $statusCode = $response->getStatusCode();
-                    throw new ApiException(
-                        sprintf(
-                            '[%d] Error connecting to the API (%s)',
-                            $statusCode,
-                            $exception->getRequest()->getUri()
-                        ),
-                        $statusCode,
-                        $response->getHeaders(),
-                        (string) $response->getBody()
-                    );
-                }
-            );
-    }
-
-    /**
-     * Create request for operation 'editCampaign'
-     *
-     * @param  \sendx\model\CampaignRequest $campaign_request (required)
-     * @param  string $campaign_id The ID of the campaign to edit (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['editCampaign'] to see the possible values for this operation
-     *
-     * @throws \InvalidArgumentException
-     * @return \GuzzleHttp\Psr7\Request
-     */
-    public function editCampaignRequest($campaign_request, $campaign_id, string $contentType = self::contentTypes['editCampaign'][0])
-    {
-
-        // verify the required parameter 'campaign_request' is set
-        if ($campaign_request === null || (is_array($campaign_request) && count($campaign_request) === 0)) {
-            throw new \InvalidArgumentException(
-                'Missing the required parameter $campaign_request when calling editCampaign'
-            );
-        }
-
-        // verify the required parameter 'campaign_id' is set
-        if ($campaign_id === null || (is_array($campaign_id) && count($campaign_id) === 0)) {
-            throw new \InvalidArgumentException(
-                'Missing the required parameter $campaign_id when calling editCampaign'
-            );
-        }
-
-
-        $resourcePath = '/campaign/{campaignId}';
-        $formParams = [];
-        $queryParams = [];
-        $headerParams = [];
-        $httpBody = '';
-        $multipart = false;
-
-
-
-        // path params
-        if ($campaign_id !== null) {
-            $resourcePath = str_replace(
-                '{' . 'campaignId' . '}',
-                ObjectSerializer::toPathValue($campaign_id),
-                $resourcePath
-            );
-        }
-
-
-        $headers = $this->headerSelector->selectHeaders(
-            ['application/json', ],
-            $contentType,
-            $multipart
-        );
-
-        // for model (json/xml)
-        if (isset($campaign_request)) {
-            if (stripos($headers['Content-Type'], 'application/json') !== false) {
-                # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($campaign_request));
-            } else {
-                $httpBody = $campaign_request;
-            }
-        } elseif (count($formParams) > 0) {
-            if ($multipart) {
-                $multipartContents = [];
-                foreach ($formParams as $formParamName => $formParamValue) {
-                    $formParamValueItems = is_array($formParamValue) ? $formParamValue : [$formParamValue];
-                    foreach ($formParamValueItems as $formParamValueItem) {
-                        $multipartContents[] = [
-                            'name' => $formParamName,
-                            'contents' => $formParamValueItem
-                        ];
-                    }
-                }
-                // for HTTP post (form)
-                $httpBody = new MultipartStream($multipartContents);
-
-            } elseif (stripos($headers['Content-Type'], 'application/json') !== false) {
-                # if Content-Type contains "application/json", json_encode the form parameters
-                $httpBody = \GuzzleHttp\Utils::jsonEncode($formParams);
-            } else {
-                // for HTTP post (form)
-                $httpBody = ObjectSerializer::buildQuery($formParams);
-            }
-        }
-
-        // this endpoint requires API key authentication
-        $apiKey = $this->config->getApiKeyWithPrefix('X-Team-ApiKey');
-        if ($apiKey !== null) {
-            $headers['X-Team-ApiKey'] = $apiKey;
-        }
-
-        $defaultHeaders = [];
-        if ($this->config->getUserAgent()) {
-            $defaultHeaders['User-Agent'] = $this->config->getUserAgent();
-        }
-
-        $headers = array_merge(
-            $defaultHeaders,
-            $headerParams,
-            $headers
-        );
-
-        $operationHost = $this->config->getHost();
-        $query = ObjectSerializer::buildQuery($queryParams);
-        return new Request(
-            'PUT',
-            $operationHost . $resourcePath . ($query ? "?{$query}" : ''),
-            $headers,
-            $httpBody
-        );
-    }
-
-    /**
      * Operation getAllCampaigns
      *
-     * Get All Campaigns
+     * Get all campaigns
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 20)
-     * @param  string $search Search term to filter campaigns (optional)
+     * @param  int|null $offset Number of campaigns to skip (optional, default to 0)
+     * @param  int|null $limit Maximum number of campaigns to return (optional, default to 10)
+     * @param  string|null $campaign_type Filter by campaign type (optional, default to 'all')
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllCampaigns'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Campaign[]
+     * @return \sendx\model\RestRCampaign[]|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function getAllCampaigns($offset = 0, $limit = 20, $search = null, string $contentType = self::contentTypes['getAllCampaigns'][0])
+    public function getAllCampaigns($offset = 0, $limit = 10, $campaign_type = 'all', string $contentType = self::contentTypes['getAllCampaigns'][0])
     {
-        list($response) = $this->getAllCampaignsWithHttpInfo($offset, $limit, $search, $contentType);
+        list($response) = $this->getAllCampaignsWithHttpInfo($offset, $limit, $campaign_type, $contentType);
         return $response;
     }
 
     /**
      * Operation getAllCampaignsWithHttpInfo
      *
-     * Get All Campaigns
+     * Get all campaigns
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 20)
-     * @param  string $search Search term to filter campaigns (optional)
+     * @param  int|null $offset Number of campaigns to skip (optional, default to 0)
+     * @param  int|null $limit Maximum number of campaigns to return (optional, default to 10)
+     * @param  string|null $campaign_type Filter by campaign type (optional, default to 'all')
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllCampaigns'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Campaign[], HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRCampaign[]|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function getAllCampaignsWithHttpInfo($offset = 0, $limit = 20, $search = null, string $contentType = self::contentTypes['getAllCampaigns'][0])
+    public function getAllCampaignsWithHttpInfo($offset = 0, $limit = 10, $campaign_type = 'all', string $contentType = self::contentTypes['getAllCampaigns'][0])
     {
-        $request = $this->getAllCampaignsRequest($offset, $limit, $search, $contentType);
+        $request = $this->getAllCampaignsRequest($offset, $limit, $campaign_type, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -1149,6 +869,30 @@ class CampaignApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRCampaign[]',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -1162,75 +906,40 @@ class CampaignApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Campaign[]' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Campaign[]' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Campaign[]', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Campaign[]';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRCampaign[]',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Campaign[]',
+                        '\sendx\model\RestRCampaign[]',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -1238,19 +947,19 @@ class CampaignApi
     /**
      * Operation getAllCampaignsAsync
      *
-     * Get All Campaigns
+     * Get all campaigns
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 20)
-     * @param  string $search Search term to filter campaigns (optional)
+     * @param  int|null $offset Number of campaigns to skip (optional, default to 0)
+     * @param  int|null $limit Maximum number of campaigns to return (optional, default to 10)
+     * @param  string|null $campaign_type Filter by campaign type (optional, default to 'all')
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllCampaigns'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getAllCampaignsAsync($offset = 0, $limit = 20, $search = null, string $contentType = self::contentTypes['getAllCampaigns'][0])
+    public function getAllCampaignsAsync($offset = 0, $limit = 10, $campaign_type = 'all', string $contentType = self::contentTypes['getAllCampaigns'][0])
     {
-        return $this->getAllCampaignsAsyncWithHttpInfo($offset, $limit, $search, $contentType)
+        return $this->getAllCampaignsAsyncWithHttpInfo($offset, $limit, $campaign_type, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -1261,20 +970,20 @@ class CampaignApi
     /**
      * Operation getAllCampaignsAsyncWithHttpInfo
      *
-     * Get All Campaigns
+     * Get all campaigns
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 20)
-     * @param  string $search Search term to filter campaigns (optional)
+     * @param  int|null $offset Number of campaigns to skip (optional, default to 0)
+     * @param  int|null $limit Maximum number of campaigns to return (optional, default to 10)
+     * @param  string|null $campaign_type Filter by campaign type (optional, default to 'all')
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllCampaigns'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getAllCampaignsAsyncWithHttpInfo($offset = 0, $limit = 20, $search = null, string $contentType = self::contentTypes['getAllCampaigns'][0])
+    public function getAllCampaignsAsyncWithHttpInfo($offset = 0, $limit = 10, $campaign_type = 'all', string $contentType = self::contentTypes['getAllCampaigns'][0])
     {
-        $returnType = '\sendx\model\Campaign[]';
-        $request = $this->getAllCampaignsRequest($offset, $limit, $search, $contentType);
+        $returnType = '\sendx\model\RestRCampaign[]';
+        $request = $this->getAllCampaignsRequest($offset, $limit, $campaign_type, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -1315,19 +1024,28 @@ class CampaignApi
     /**
      * Create request for operation 'getAllCampaigns'
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 20)
-     * @param  string $search Search term to filter campaigns (optional)
+     * @param  int|null $offset Number of campaigns to skip (optional, default to 0)
+     * @param  int|null $limit Maximum number of campaigns to return (optional, default to 10)
+     * @param  string|null $campaign_type Filter by campaign type (optional, default to 'all')
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllCampaigns'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function getAllCampaignsRequest($offset = 0, $limit = 20, $search = null, string $contentType = self::contentTypes['getAllCampaigns'][0])
+    public function getAllCampaignsRequest($offset = 0, $limit = 10, $campaign_type = 'all', string $contentType = self::contentTypes['getAllCampaigns'][0])
     {
 
-
-
+        if ($offset !== null && $offset < 0) {
+            throw new \InvalidArgumentException('invalid value for "$offset" when calling CampaignApi.getAllCampaigns, must be bigger than or equal to 0.');
+        }
+        
+        if ($limit !== null && $limit > 100) {
+            throw new \InvalidArgumentException('invalid value for "$limit" when calling CampaignApi.getAllCampaigns, must be smaller than or equal to 100.');
+        }
+        if ($limit !== null && $limit < 1) {
+            throw new \InvalidArgumentException('invalid value for "$limit" when calling CampaignApi.getAllCampaigns, must be bigger than or equal to 1.');
+        }
+        
 
 
         $resourcePath = '/campaign';
@@ -1357,8 +1075,8 @@ class CampaignApi
         ) ?? []);
         // query params
         $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
-            $search,
-            'search', // param base name
+            $campaign_type,
+            'campaignType', // param base name
             'string', // openApiType
             'form', // style
             true, // explode
@@ -1427,38 +1145,38 @@ class CampaignApi
     }
 
     /**
-     * Operation getCampaignById
+     * Operation getCampaign
      *
-     * Get Campaign By Id
+     * Get campaign by ID
      *
-     * @param  string $campaign_id The ID of the campaign to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaignById'] to see the possible values for this operation
+     * @param  string $identifier Campaign identifier - &#x60;campaign_IMBoxK2iB5sUdgiNOjqAMA&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaign'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Campaign
+     * @return \sendx\model\RestRCampaign|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function getCampaignById($campaign_id, string $contentType = self::contentTypes['getCampaignById'][0])
+    public function getCampaign($identifier, string $contentType = self::contentTypes['getCampaign'][0])
     {
-        list($response) = $this->getCampaignByIdWithHttpInfo($campaign_id, $contentType);
+        list($response) = $this->getCampaignWithHttpInfo($identifier, $contentType);
         return $response;
     }
 
     /**
-     * Operation getCampaignByIdWithHttpInfo
+     * Operation getCampaignWithHttpInfo
      *
-     * Get Campaign By Id
+     * Get campaign by ID
      *
-     * @param  string $campaign_id The ID of the campaign to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaignById'] to see the possible values for this operation
+     * @param  string $identifier Campaign identifier - &#x60;campaign_IMBoxK2iB5sUdgiNOjqAMA&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaign'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Campaign, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRCampaign|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function getCampaignByIdWithHttpInfo($campaign_id, string $contentType = self::contentTypes['getCampaignById'][0])
+    public function getCampaignWithHttpInfo($identifier, string $contentType = self::contentTypes['getCampaign'][0])
     {
-        $request = $this->getCampaignByIdRequest($campaign_id, $contentType);
+        $request = $this->getCampaignRequest($identifier, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -1482,6 +1200,42 @@ class CampaignApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRCampaign',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -1495,93 +1249,74 @@ class CampaignApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Campaign' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Campaign' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Campaign', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Campaign';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRCampaign',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Campaign',
+                        '\sendx\model\RestRCampaign',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
 
     /**
-     * Operation getCampaignByIdAsync
+     * Operation getCampaignAsync
      *
-     * Get Campaign By Id
+     * Get campaign by ID
      *
-     * @param  string $campaign_id The ID of the campaign to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaignById'] to see the possible values for this operation
+     * @param  string $identifier Campaign identifier - &#x60;campaign_IMBoxK2iB5sUdgiNOjqAMA&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getCampaignByIdAsync($campaign_id, string $contentType = self::contentTypes['getCampaignById'][0])
+    public function getCampaignAsync($identifier, string $contentType = self::contentTypes['getCampaign'][0])
     {
-        return $this->getCampaignByIdAsyncWithHttpInfo($campaign_id, $contentType)
+        return $this->getCampaignAsyncWithHttpInfo($identifier, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -1590,20 +1325,20 @@ class CampaignApi
     }
 
     /**
-     * Operation getCampaignByIdAsyncWithHttpInfo
+     * Operation getCampaignAsyncWithHttpInfo
      *
-     * Get Campaign By Id
+     * Get campaign by ID
      *
-     * @param  string $campaign_id The ID of the campaign to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaignById'] to see the possible values for this operation
+     * @param  string $identifier Campaign identifier - &#x60;campaign_IMBoxK2iB5sUdgiNOjqAMA&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getCampaignByIdAsyncWithHttpInfo($campaign_id, string $contentType = self::contentTypes['getCampaignById'][0])
+    public function getCampaignAsyncWithHttpInfo($identifier, string $contentType = self::contentTypes['getCampaign'][0])
     {
-        $returnType = '\sendx\model\Campaign';
-        $request = $this->getCampaignByIdRequest($campaign_id, $contentType);
+        $returnType = '\sendx\model\RestRCampaign';
+        $request = $this->getCampaignRequest($identifier, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -1642,26 +1377,29 @@ class CampaignApi
     }
 
     /**
-     * Create request for operation 'getCampaignById'
+     * Create request for operation 'getCampaign'
      *
-     * @param  string $campaign_id The ID of the campaign to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaignById'] to see the possible values for this operation
+     * @param  string $identifier Campaign identifier - &#x60;campaign_IMBoxK2iB5sUdgiNOjqAMA&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getCampaign'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function getCampaignByIdRequest($campaign_id, string $contentType = self::contentTypes['getCampaignById'][0])
+    public function getCampaignRequest($identifier, string $contentType = self::contentTypes['getCampaign'][0])
     {
 
-        // verify the required parameter 'campaign_id' is set
-        if ($campaign_id === null || (is_array($campaign_id) && count($campaign_id) === 0)) {
+        // verify the required parameter 'identifier' is set
+        if ($identifier === null || (is_array($identifier) && count($identifier) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $campaign_id when calling getCampaignById'
+                'Missing the required parameter $identifier when calling getCampaign'
             );
         }
+        if (!preg_match("/^(campaign_)?[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling CampaignApi.getCampaign, must conform to the pattern /^(campaign_)?[a-zA-Z0-9]{22}$/.");
+        }
+        
 
-
-        $resourcePath = '/campaign/{campaignId}';
+        $resourcePath = '/campaign/{identifier}';
         $formParams = [];
         $queryParams = [];
         $headerParams = [];
@@ -1671,10 +1409,10 @@ class CampaignApi
 
 
         // path params
-        if ($campaign_id !== null) {
+        if ($identifier !== null) {
             $resourcePath = str_replace(
-                '{' . 'campaignId' . '}',
-                ObjectSerializer::toPathValue($campaign_id),
+                '{' . 'identifier' . '}',
+                ObjectSerializer::toPathValue($identifier),
                 $resourcePath
             );
         }
@@ -1755,5 +1493,48 @@ class CampaignApi
         }
 
         return $options;
+    }
+
+    private function handleResponseWithDataType(
+        string $dataType,
+        RequestInterface $request,
+        ResponseInterface $response
+    ): array {
+        if ($dataType === '\SplFileObject') {
+            $content = $response->getBody(); //stream goes to serializer
+        } else {
+            $content = (string) $response->getBody();
+            if ($dataType !== 'string') {
+                try {
+                    $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
+                } catch (\JsonException $exception) {
+                    throw new ApiException(
+                        sprintf(
+                            'Error JSON decoding server response (%s)',
+                            $request->getUri()
+                        ),
+                        $response->getStatusCode(),
+                        $response->getHeaders(),
+                        $content
+                    );
+                }
+            }
+        }
+
+        return [
+            ObjectSerializer::deserialize($content, $dataType, []),
+            $response->getStatusCode(),
+            $response->getHeaders()
+        ];
+    }
+
+    private function responseWithinRangeCode(
+        string $rangeCode,
+        int $statusCode
+    ): bool {
+        $left = (int) ($rangeCode[0].'00');
+        $right = (int) ($rangeCode[0].'99');
+
+        return $statusCode >= $left && $statusCode <= $right;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 /**
  * EventApi
- * PHP version 7.4
+ * PHP version 8.1
  *
  * @category Class
  * @package  sendx
@@ -12,12 +12,12 @@
 /**
  * SendX REST API
  *
- * # Introduction SendX is an email marketing product. It helps you convert website visitors to customers, send them promotional emails, engage with them using drip sequences and craft custom journeys using powerful but simple automations. The SendX API is organized around REST. Our API has predictable resource-oriented URLs, accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs. The SendX Rest API doesn’t support bulk updates. You can work on only one object per request. <br>
+ * # SendX REST API Documentation  ## 🚀 Introduction  The SendX API is organized around REST principles. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.  **Key Features:** - 🔒 **Security**: Team-based authentication with optional member-level access - 🎯 **Resource-Oriented**: RESTful design with clear resource boundaries - 📊 **Rich Data Models**: Three-layer model system (Input/Output/Internal) - 🔗 **Relationships**: Automatic prefix handling for resource relationships - 📈 **Scalable**: Built for high-volume email marketing operations  ## 🏗️ Architecture Overview  SendX uses a three-layer model architecture:  1. **Input Models** (`RestE*`): For API requests 2. **Output Models** (`RestR*`): For API responses with prefixed IDs 3. **Internal Models**: Core business logic (not exposed in API)  ## 🔐 Security & Authentication  SendX uses API key authentication:  ### Team API Key ```http X-Team-ApiKey: YOUR_TEAM_API_KEY ``` - **Required for all requests** - Team-level access to resources - Available in SendX Settings → Team API Key  ## 🆔 Encrypted ID System  SendX uses encrypted IDs for security and better developer experience:  - **Internal IDs**: Sequential integers (not exposed) - **Encrypted IDs**: 22-character alphanumeric strings - **Prefixed IDs**: Resource-type prefixes in API responses (`contact_<22-char-id>`)  ### ID Format  **All resource IDs follow this pattern:** ``` <resource_prefix>_<22_character_alphanumeric_string> ```  **Example:** ```json {   \"id\": \"contact_BnKjkbBBS500CoBCP0oChQ\",   \"lists\": [\"list_OcuxJHdiAvujmwQVJfd3ss\", \"list_0tOFLp5RgV7s3LNiHrjGYs\"],   \"tags\": [\"tag_UhsDkjL772Qbj5lWtT62VK\", \"tag_fL7t9lsnZ9swvx2HrtQ9wM\"] } ```  ## 📚 Resource Prefixes  | Resource | Prefix | Example | |----------|--------|---------| | Contact | `contact_` | `contact_BnKjkbBBS500CoBCP0oChQ` | | Campaign | `campaign_` | `campaign_LUE9BTxmksSmqHWbh96zsn` | | List | `list_` | `list_OcuxJHdiAvujmwQVJfd3ss` | | Tag | `tag_` | `tag_UhsDkjL772Qbj5lWtT62VK` | | Sender | `sender_` | `sender_4vK3WFhMgvOwUNyaL4QxCD` | | Template | `template_` | `template_f3lJvTEhSjKGVb5Lwc5SWS` | | Custom Field | `field_` | `field_MnuqBAG2NPLm7PZMWbjQxt` | | Webhook | `webhook_` | `webhook_9l154iiXlZoPo7vngmamee` | | Post | `post_` | `post_XyZ123aBc456DeF789GhI` | | Post Category | `post_category_` | `post_category_YzS1wOU20yw87UUHKxMzwn` | | Post Tag | `post_tag_` | `post_tag_123XyZ456AbC` | | Member | `member_` | `member_JkL012MnO345PqR678` |  ## 🎯 Best Practices  ### Error Handling - **Always check status codes**: 2xx = success, 4xx = client error, 5xx = server error - **Read error messages**: Descriptive messages help debug issues - **Handle rate limits**: Respect API rate limits for optimal performance  ### Data Validation - **Email format**: Must be valid email addresses - **Required fields**: Check documentation for mandatory fields - **Field lengths**: Respect maximum length constraints  ### Performance - **Pagination**: Use offset/limit for large datasets - **Batch operations**: Process multiple items when supported - **Caching**: Cache responses when appropriate  ## 🛠️ SDKs & Integration  Official SDKs available for: - [Golang](https://github.com/sendx/sendx-go-sdk) - [Python](https://github.com/sendx/sendx-python-sdk) - [Ruby](https://github.com/sendx/sendx-ruby-sdk) - [Java](https://github.com/sendx/sendx-java-sdk) - [PHP](https://github.com/sendx/sendx-php-sdk) - [JavaScript](https://github.com/sendx/sendx-javascript-sdk)  ## 📞 Support  Need help? Contact us: - 💬 **Website Chat**: Available on sendx.io - 📧 **Email**: hello@sendx.io - 📚 **Documentation**: Full guides at help.sendx.io  ---  **API Endpoint:** `https://api.sendx.io/api/v1/rest`  [<img src=\"https://run.pstmn.io/button.svg\" alt=\"Run In Postman\" style=\"width: 128px; height: 32px;\">](https://god.gw.postman.com/run-collection/33476323-44b198b0-5219-4619-a01f-cfc24d573885?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D33476323-44b198b0-5219-4619-a01f-cfc24d573885%26entityType%3Dcollection%26workspaceId%3D6b1e4f65-96a9-4136-9512-6266c852517e)
  *
  * The version of the OpenAPI document: 1.0.0
- * Contact: support@sendx.io
+ * Contact: hello@sendx.io
  * Generated by: https://openapi-generator.tech
- * Generator version: 7.8.0
+ * Generator version: 7.13.0
  */
 
 /**
@@ -35,8 +35,11 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use sendx\ApiException;
 use sendx\Configuration;
+use sendx\FormDataProcessor;
 use sendx\HeaderSelector;
 use sendx\ObjectSerializer;
 
@@ -72,10 +75,10 @@ class EventApi
 
     /** @var string[] $contentTypes **/
     public const contentTypes = [
-        'createRevenueEvent' => [
+        'eventsCustomPostbackGet' => [
             'application/json',
         ],
-        'pushCustomEvent' => [
+        'eventsRevenuePostbackGet' => [
             'application/json',
         ],
     ];
@@ -87,13 +90,13 @@ class EventApi
      * @param int             $hostIndex (Optional) host index to select the list of hosts if defined in the OpenAPI spec
      */
     public function __construct(
-        ClientInterface $client = null,
-        Configuration $config = null,
-        HeaderSelector $selector = null,
-        $hostIndex = 0
+        ?ClientInterface $client = null,
+        ?Configuration $config = null,
+        ?HeaderSelector $selector = null,
+        int $hostIndex = 0
     ) {
         $this->client = $client ?: new Client();
-        $this->config = $config ?: new Configuration();
+        $this->config = $config ?: Configuration::getDefaultConfiguration();
         $this->headerSelector = $selector ?: new HeaderSelector();
         $this->hostIndex = $hostIndex;
     }
@@ -127,38 +130,44 @@ class EventApi
     }
 
     /**
-     * Operation createRevenueEvent
+     * Operation eventsCustomPostbackGet
      *
-     * Record a revenue event for a specific contact
+     * Custom Event Postback URL
      *
-     * @param  \sendx\model\RevenueEventRequest $revenue_event_request revenue_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createRevenueEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  string $event The custom event name. (required)
+     * @param  string $any_key Arbitrary custom data as key-value pairs. Add custom parameters directly to the query string.  For example, &#x60;amount&#x3D;24.43&#x60; or &#x60;currency&#x3D;USD&#x60;. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsCustomPostbackGet'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\EventResponse
+     * @return \sendx\model\EventsRevenuePostbackGet200Response
      */
-    public function createRevenueEvent($revenue_event_request, string $contentType = self::contentTypes['createRevenueEvent'][0])
+    public function eventsCustomPostbackGet($team_id, $id, $event, $any_key, string $contentType = self::contentTypes['eventsCustomPostbackGet'][0])
     {
-        list($response) = $this->createRevenueEventWithHttpInfo($revenue_event_request, $contentType);
+        list($response) = $this->eventsCustomPostbackGetWithHttpInfo($team_id, $id, $event, $any_key, $contentType);
         return $response;
     }
 
     /**
-     * Operation createRevenueEventWithHttpInfo
+     * Operation eventsCustomPostbackGetWithHttpInfo
      *
-     * Record a revenue event for a specific contact
+     * Custom Event Postback URL
      *
-     * @param  \sendx\model\RevenueEventRequest $revenue_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createRevenueEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  string $event The custom event name. (required)
+     * @param  string $any_key Arbitrary custom data as key-value pairs. Add custom parameters directly to the query string.  For example, &#x60;amount&#x3D;24.43&#x60; or &#x60;currency&#x3D;USD&#x60;. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsCustomPostbackGet'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\EventResponse, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\EventsRevenuePostbackGet200Response, HTTP status code, HTTP response headers (array of strings)
      */
-    public function createRevenueEventWithHttpInfo($revenue_event_request, string $contentType = self::contentTypes['createRevenueEvent'][0])
+    public function eventsCustomPostbackGetWithHttpInfo($team_id, $id, $event, $any_key, string $contentType = self::contentTypes['eventsCustomPostbackGet'][0])
     {
-        $request = $this->createRevenueEventRequest($revenue_event_request, $contentType);
+        $request = $this->eventsCustomPostbackGetRequest($team_id, $id, $event, $any_key, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -182,6 +191,18 @@ class EventApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\EventsRevenuePostbackGet200Response',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -195,93 +216,45 @@ class EventApi
                 );
             }
 
-            switch($statusCode) {
-                case 201:
-                    if ('\sendx\model\EventResponse' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\EventResponse' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\EventResponse', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\EventResponse';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\EventsRevenuePostbackGet200Response',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
-                case 201:
+                case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\EventResponse',
+                        '\sendx\model\EventsRevenuePostbackGet200Response',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
 
     /**
-     * Operation createRevenueEventAsync
+     * Operation eventsCustomPostbackGetAsync
      *
-     * Record a revenue event for a specific contact
+     * Custom Event Postback URL
      *
-     * @param  \sendx\model\RevenueEventRequest $revenue_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createRevenueEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  string $event The custom event name. (required)
+     * @param  string $any_key Arbitrary custom data as key-value pairs. Add custom parameters directly to the query string.  For example, &#x60;amount&#x3D;24.43&#x60; or &#x60;currency&#x3D;USD&#x60;. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsCustomPostbackGet'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createRevenueEventAsync($revenue_event_request, string $contentType = self::contentTypes['createRevenueEvent'][0])
+    public function eventsCustomPostbackGetAsync($team_id, $id, $event, $any_key, string $contentType = self::contentTypes['eventsCustomPostbackGet'][0])
     {
-        return $this->createRevenueEventAsyncWithHttpInfo($revenue_event_request, $contentType)
+        return $this->eventsCustomPostbackGetAsyncWithHttpInfo($team_id, $id, $event, $any_key, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -290,20 +263,23 @@ class EventApi
     }
 
     /**
-     * Operation createRevenueEventAsyncWithHttpInfo
+     * Operation eventsCustomPostbackGetAsyncWithHttpInfo
      *
-     * Record a revenue event for a specific contact
+     * Custom Event Postback URL
      *
-     * @param  \sendx\model\RevenueEventRequest $revenue_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createRevenueEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  string $event The custom event name. (required)
+     * @param  string $any_key Arbitrary custom data as key-value pairs. Add custom parameters directly to the query string.  For example, &#x60;amount&#x3D;24.43&#x60; or &#x60;currency&#x3D;USD&#x60;. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsCustomPostbackGet'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createRevenueEventAsyncWithHttpInfo($revenue_event_request, string $contentType = self::contentTypes['createRevenueEvent'][0])
+    public function eventsCustomPostbackGetAsyncWithHttpInfo($team_id, $id, $event, $any_key, string $contentType = self::contentTypes['eventsCustomPostbackGet'][0])
     {
-        $returnType = '\sendx\model\EventResponse';
-        $request = $this->createRevenueEventRequest($revenue_event_request, $contentType);
+        $returnType = '\sendx\model\EventsRevenuePostbackGet200Response';
+        $request = $this->eventsCustomPostbackGetRequest($team_id, $id, $event, $any_key, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -342,32 +318,92 @@ class EventApi
     }
 
     /**
-     * Create request for operation 'createRevenueEvent'
+     * Create request for operation 'eventsCustomPostbackGet'
      *
-     * @param  \sendx\model\RevenueEventRequest $revenue_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createRevenueEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  string $event The custom event name. (required)
+     * @param  string $any_key Arbitrary custom data as key-value pairs. Add custom parameters directly to the query string.  For example, &#x60;amount&#x3D;24.43&#x60; or &#x60;currency&#x3D;USD&#x60;. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsCustomPostbackGet'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function createRevenueEventRequest($revenue_event_request, string $contentType = self::contentTypes['createRevenueEvent'][0])
+    public function eventsCustomPostbackGetRequest($team_id, $id, $event, $any_key, string $contentType = self::contentTypes['eventsCustomPostbackGet'][0])
     {
 
-        // verify the required parameter 'revenue_event_request' is set
-        if ($revenue_event_request === null || (is_array($revenue_event_request) && count($revenue_event_request) === 0)) {
+        // verify the required parameter 'team_id' is set
+        if ($team_id === null || (is_array($team_id) && count($team_id) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $revenue_event_request when calling createRevenueEvent'
+                'Missing the required parameter $team_id when calling eventsCustomPostbackGet'
+            );
+        }
+
+        // verify the required parameter 'id' is set
+        if ($id === null || (is_array($id) && count($id) === 0)) {
+            throw new \InvalidArgumentException(
+                'Missing the required parameter $id when calling eventsCustomPostbackGet'
+            );
+        }
+
+        // verify the required parameter 'event' is set
+        if ($event === null || (is_array($event) && count($event) === 0)) {
+            throw new \InvalidArgumentException(
+                'Missing the required parameter $event when calling eventsCustomPostbackGet'
+            );
+        }
+
+        // verify the required parameter 'any_key' is set
+        if ($any_key === null || (is_array($any_key) && count($any_key) === 0)) {
+            throw new \InvalidArgumentException(
+                'Missing the required parameter $any_key when calling eventsCustomPostbackGet'
             );
         }
 
 
-        $resourcePath = '/events/revenue';
+        $resourcePath = '/events/custom/postback';
         $formParams = [];
         $queryParams = [];
         $headerParams = [];
         $httpBody = '';
         $multipart = false;
 
+        // query params
+        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
+            $team_id,
+            'team_id', // param base name
+            'string', // openApiType
+            'form', // style
+            true, // explode
+            true // required
+        ) ?? []);
+        // query params
+        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
+            $id,
+            'id', // param base name
+            'string', // openApiType
+            'form', // style
+            true, // explode
+            true // required
+        ) ?? []);
+        // query params
+        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
+            $event,
+            'event', // param base name
+            'string', // openApiType
+            'form', // style
+            true, // explode
+            true // required
+        ) ?? []);
+        // query params
+        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
+            $any_key,
+            'any-key', // param base name
+            'string', // openApiType
+            'form', // style
+            true, // explode
+            true // required
+        ) ?? []);
 
 
 
@@ -379,14 +415,7 @@ class EventApi
         );
 
         // for model (json/xml)
-        if (isset($revenue_event_request)) {
-            if (stripos($headers['Content-Type'], 'application/json') !== false) {
-                # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($revenue_event_request));
-            } else {
-                $httpBody = $revenue_event_request;
-            }
-        } elseif (count($formParams) > 0) {
+        if (count($formParams) > 0) {
             if ($multipart) {
                 $multipartContents = [];
                 foreach ($formParams as $formParamName => $formParamValue) {
@@ -430,7 +459,7 @@ class EventApi
         $operationHost = $this->config->getHost();
         $query = ObjectSerializer::buildQuery($queryParams);
         return new Request(
-            'POST',
+            'GET',
             $operationHost . $resourcePath . ($query ? "?{$query}" : ''),
             $headers,
             $httpBody
@@ -438,38 +467,44 @@ class EventApi
     }
 
     /**
-     * Operation pushCustomEvent
+     * Operation eventsRevenuePostbackGet
      *
-     * Push a custom event associated with a contact
+     * Revenue Event Postback URL
      *
-     * @param  \sendx\model\CustomEventRequest $custom_event_request custom_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['pushCustomEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  float $amount The revenue amount to be posted back. (required)
+     * @param  string $campaign_id The unique identifier for the campaign. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsRevenuePostbackGet'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\EventResponse
+     * @return \sendx\model\EventsRevenuePostbackGet200Response|\sendx\model\EventsRevenuePostbackGet400Response|\sendx\model\EventsRevenuePostbackGet500Response
      */
-    public function pushCustomEvent($custom_event_request, string $contentType = self::contentTypes['pushCustomEvent'][0])
+    public function eventsRevenuePostbackGet($team_id, $id, $amount, $campaign_id, string $contentType = self::contentTypes['eventsRevenuePostbackGet'][0])
     {
-        list($response) = $this->pushCustomEventWithHttpInfo($custom_event_request, $contentType);
+        list($response) = $this->eventsRevenuePostbackGetWithHttpInfo($team_id, $id, $amount, $campaign_id, $contentType);
         return $response;
     }
 
     /**
-     * Operation pushCustomEventWithHttpInfo
+     * Operation eventsRevenuePostbackGetWithHttpInfo
      *
-     * Push a custom event associated with a contact
+     * Revenue Event Postback URL
      *
-     * @param  \sendx\model\CustomEventRequest $custom_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['pushCustomEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  float $amount The revenue amount to be posted back. (required)
+     * @param  string $campaign_id The unique identifier for the campaign. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsRevenuePostbackGet'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\EventResponse, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\EventsRevenuePostbackGet200Response|\sendx\model\EventsRevenuePostbackGet400Response|\sendx\model\EventsRevenuePostbackGet500Response, HTTP status code, HTTP response headers (array of strings)
      */
-    public function pushCustomEventWithHttpInfo($custom_event_request, string $contentType = self::contentTypes['pushCustomEvent'][0])
+    public function eventsRevenuePostbackGetWithHttpInfo($team_id, $id, $amount, $campaign_id, string $contentType = self::contentTypes['eventsRevenuePostbackGet'][0])
     {
-        $request = $this->pushCustomEventRequest($custom_event_request, $contentType);
+        $request = $this->eventsRevenuePostbackGetRequest($team_id, $id, $amount, $campaign_id, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -493,6 +528,30 @@ class EventApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\EventsRevenuePostbackGet200Response',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\EventsRevenuePostbackGet400Response',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\EventsRevenuePostbackGet500Response',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -506,93 +565,61 @@ class EventApi
                 );
             }
 
-            switch($statusCode) {
-                case 201:
-                    if ('\sendx\model\EventResponse' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\EventResponse' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\EventResponse', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\EventResponse';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\EventsRevenuePostbackGet200Response',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
-                case 201:
+                case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\EventResponse',
+                        '\sendx\model\EventsRevenuePostbackGet200Response',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\EventsRevenuePostbackGet400Response',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\EventsRevenuePostbackGet500Response',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
 
     /**
-     * Operation pushCustomEventAsync
+     * Operation eventsRevenuePostbackGetAsync
      *
-     * Push a custom event associated with a contact
+     * Revenue Event Postback URL
      *
-     * @param  \sendx\model\CustomEventRequest $custom_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['pushCustomEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  float $amount The revenue amount to be posted back. (required)
+     * @param  string $campaign_id The unique identifier for the campaign. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsRevenuePostbackGet'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function pushCustomEventAsync($custom_event_request, string $contentType = self::contentTypes['pushCustomEvent'][0])
+    public function eventsRevenuePostbackGetAsync($team_id, $id, $amount, $campaign_id, string $contentType = self::contentTypes['eventsRevenuePostbackGet'][0])
     {
-        return $this->pushCustomEventAsyncWithHttpInfo($custom_event_request, $contentType)
+        return $this->eventsRevenuePostbackGetAsyncWithHttpInfo($team_id, $id, $amount, $campaign_id, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -601,20 +628,23 @@ class EventApi
     }
 
     /**
-     * Operation pushCustomEventAsyncWithHttpInfo
+     * Operation eventsRevenuePostbackGetAsyncWithHttpInfo
      *
-     * Push a custom event associated with a contact
+     * Revenue Event Postback URL
      *
-     * @param  \sendx\model\CustomEventRequest $custom_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['pushCustomEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  float $amount The revenue amount to be posted back. (required)
+     * @param  string $campaign_id The unique identifier for the campaign. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsRevenuePostbackGet'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function pushCustomEventAsyncWithHttpInfo($custom_event_request, string $contentType = self::contentTypes['pushCustomEvent'][0])
+    public function eventsRevenuePostbackGetAsyncWithHttpInfo($team_id, $id, $amount, $campaign_id, string $contentType = self::contentTypes['eventsRevenuePostbackGet'][0])
     {
-        $returnType = '\sendx\model\EventResponse';
-        $request = $this->pushCustomEventRequest($custom_event_request, $contentType);
+        $returnType = '\sendx\model\EventsRevenuePostbackGet200Response';
+        $request = $this->eventsRevenuePostbackGetRequest($team_id, $id, $amount, $campaign_id, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -653,32 +683,92 @@ class EventApi
     }
 
     /**
-     * Create request for operation 'pushCustomEvent'
+     * Create request for operation 'eventsRevenuePostbackGet'
      *
-     * @param  \sendx\model\CustomEventRequest $custom_event_request (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['pushCustomEvent'] to see the possible values for this operation
+     * @param  string $team_id The unique identifier for the team. (required)
+     * @param  string $id The unique sendx identifier for the contact/customer. (required)
+     * @param  float $amount The revenue amount to be posted back. (required)
+     * @param  string $campaign_id The unique identifier for the campaign. (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['eventsRevenuePostbackGet'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function pushCustomEventRequest($custom_event_request, string $contentType = self::contentTypes['pushCustomEvent'][0])
+    public function eventsRevenuePostbackGetRequest($team_id, $id, $amount, $campaign_id, string $contentType = self::contentTypes['eventsRevenuePostbackGet'][0])
     {
 
-        // verify the required parameter 'custom_event_request' is set
-        if ($custom_event_request === null || (is_array($custom_event_request) && count($custom_event_request) === 0)) {
+        // verify the required parameter 'team_id' is set
+        if ($team_id === null || (is_array($team_id) && count($team_id) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $custom_event_request when calling pushCustomEvent'
+                'Missing the required parameter $team_id when calling eventsRevenuePostbackGet'
+            );
+        }
+
+        // verify the required parameter 'id' is set
+        if ($id === null || (is_array($id) && count($id) === 0)) {
+            throw new \InvalidArgumentException(
+                'Missing the required parameter $id when calling eventsRevenuePostbackGet'
+            );
+        }
+
+        // verify the required parameter 'amount' is set
+        if ($amount === null || (is_array($amount) && count($amount) === 0)) {
+            throw new \InvalidArgumentException(
+                'Missing the required parameter $amount when calling eventsRevenuePostbackGet'
+            );
+        }
+
+        // verify the required parameter 'campaign_id' is set
+        if ($campaign_id === null || (is_array($campaign_id) && count($campaign_id) === 0)) {
+            throw new \InvalidArgumentException(
+                'Missing the required parameter $campaign_id when calling eventsRevenuePostbackGet'
             );
         }
 
 
-        $resourcePath = '/events/custom';
+        $resourcePath = '/events/revenue/postback';
         $formParams = [];
         $queryParams = [];
         $headerParams = [];
         $httpBody = '';
         $multipart = false;
 
+        // query params
+        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
+            $team_id,
+            'team_id', // param base name
+            'string', // openApiType
+            'form', // style
+            true, // explode
+            true // required
+        ) ?? []);
+        // query params
+        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
+            $id,
+            'id', // param base name
+            'string', // openApiType
+            'form', // style
+            true, // explode
+            true // required
+        ) ?? []);
+        // query params
+        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
+            $amount,
+            'amount', // param base name
+            'number', // openApiType
+            'form', // style
+            true, // explode
+            true // required
+        ) ?? []);
+        // query params
+        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
+            $campaign_id,
+            'campaign_id', // param base name
+            'string', // openApiType
+            'form', // style
+            true, // explode
+            true // required
+        ) ?? []);
 
 
 
@@ -690,14 +780,7 @@ class EventApi
         );
 
         // for model (json/xml)
-        if (isset($custom_event_request)) {
-            if (stripos($headers['Content-Type'], 'application/json') !== false) {
-                # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($custom_event_request));
-            } else {
-                $httpBody = $custom_event_request;
-            }
-        } elseif (count($formParams) > 0) {
+        if (count($formParams) > 0) {
             if ($multipart) {
                 $multipartContents = [];
                 foreach ($formParams as $formParamName => $formParamValue) {
@@ -741,7 +824,7 @@ class EventApi
         $operationHost = $this->config->getHost();
         $query = ObjectSerializer::buildQuery($queryParams);
         return new Request(
-            'POST',
+            'GET',
             $operationHost . $resourcePath . ($query ? "?{$query}" : ''),
             $headers,
             $httpBody
@@ -765,5 +848,48 @@ class EventApi
         }
 
         return $options;
+    }
+
+    private function handleResponseWithDataType(
+        string $dataType,
+        RequestInterface $request,
+        ResponseInterface $response
+    ): array {
+        if ($dataType === '\SplFileObject') {
+            $content = $response->getBody(); //stream goes to serializer
+        } else {
+            $content = (string) $response->getBody();
+            if ($dataType !== 'string') {
+                try {
+                    $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
+                } catch (\JsonException $exception) {
+                    throw new ApiException(
+                        sprintf(
+                            'Error JSON decoding server response (%s)',
+                            $request->getUri()
+                        ),
+                        $response->getStatusCode(),
+                        $response->getHeaders(),
+                        $content
+                    );
+                }
+            }
+        }
+
+        return [
+            ObjectSerializer::deserialize($content, $dataType, []),
+            $response->getStatusCode(),
+            $response->getHeaders()
+        ];
+    }
+
+    private function responseWithinRangeCode(
+        string $rangeCode,
+        int $statusCode
+    ): bool {
+        $left = (int) ($rangeCode[0].'00');
+        $right = (int) ($rangeCode[0].'99');
+
+        return $statusCode >= $left && $statusCode <= $right;
     }
 }

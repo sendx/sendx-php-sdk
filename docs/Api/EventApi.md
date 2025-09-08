@@ -4,19 +4,19 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-| [**createRevenueEvent()**](EventApi.md#createRevenueEvent) | **POST** /events/revenue | Record a revenue event for a specific contact |
-| [**pushCustomEvent()**](EventApi.md#pushCustomEvent) | **POST** /events/custom | Push a custom event associated with a contact |
+| [**eventsCustomPostbackGet()**](EventApi.md#eventsCustomPostbackGet) | **GET** /events/custom/postback | Custom Event Postback URL |
+| [**eventsRevenuePostbackGet()**](EventApi.md#eventsRevenuePostbackGet) | **GET** /events/revenue/postback | Revenue Event Postback URL |
 
 
-## `createRevenueEvent()`
+## `eventsCustomPostbackGet()`
 
 ```php
-createRevenueEvent($revenue_event_request): \sendx\model\EventResponse
+eventsCustomPostbackGet($team_id, $id, $event, $any_key): \sendx\model\EventsRevenuePostbackGet200Response
 ```
 
-Record a revenue event for a specific contact
+Custom Event Postback URL
 
-Records a revenue event, which can be attributed to campaigns, drips, workflows, or other sources of user interaction.
+Register a custom event for a specific team and event.
 
 ### Example
 
@@ -25,7 +25,7 @@ Records a revenue event, which can be attributed to campaigns, drips, workflows,
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -37,13 +37,16 @@ $apiInstance = new sendx\Api\EventApi(
     new GuzzleHttp\Client(),
     $config
 );
-$revenue_event_request = new \sendx\model\RevenueEventRequest(); // \sendx\model\RevenueEventRequest
+$team_id = 'team_id_example'; // string | The unique identifier for the team.
+$id = 'id_example'; // string | The unique sendx identifier for the contact/customer.
+$event = 'event_example'; // string | The custom event name.
+$any_key = 24.43; // string | Arbitrary custom data as key-value pairs. Add custom parameters directly to the query string.  For example, `amount=24.43` or `currency=USD`.
 
 try {
-    $result = $apiInstance->createRevenueEvent($revenue_event_request);
+    $result = $apiInstance->eventsCustomPostbackGet($team_id, $id, $event, $any_key);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling EventApi->createRevenueEvent: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling EventApi->eventsCustomPostbackGet: ', $e->getMessage(), PHP_EOL;
 }
 ```
 
@@ -51,34 +54,37 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **revenue_event_request** | [**\sendx\model\RevenueEventRequest**](../Model/RevenueEventRequest.md)|  | |
+| **team_id** | **string**| The unique identifier for the team. | |
+| **id** | **string**| The unique sendx identifier for the contact/customer. | |
+| **event** | **string**| The custom event name. | |
+| **any_key** | **string**| Arbitrary custom data as key-value pairs. Add custom parameters directly to the query string.  For example, &#x60;amount&#x3D;24.43&#x60; or &#x60;currency&#x3D;USD&#x60;. | |
 
 ### Return type
 
-[**\sendx\model\EventResponse**](../Model/EventResponse.md)
+[**\sendx\model\EventsRevenuePostbackGet200Response**](../Model/EventsRevenuePostbackGet200Response.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
-- **Content-Type**: `application/json`
+- **Content-Type**: Not defined
 - **Accept**: `application/json`
 
 [[Back to top]](#) [[Back to API list]](../../README.md#endpoints)
 [[Back to Model list]](../../README.md#models)
 [[Back to README]](../../README.md)
 
-## `pushCustomEvent()`
+## `eventsRevenuePostbackGet()`
 
 ```php
-pushCustomEvent($custom_event_request): \sendx\model\EventResponse
+eventsRevenuePostbackGet($team_id, $id, $amount, $campaign_id): \sendx\model\EventsRevenuePostbackGet200Response
 ```
 
-Push a custom event associated with a contact
+Revenue Event Postback URL
 
-Pushes a custom event with properties and values for a specified contact.
+Trigger a revenue postback for a specific team and event.
 
 ### Example
 
@@ -87,7 +93,7 @@ Pushes a custom event with properties and values for a specified contact.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -99,13 +105,16 @@ $apiInstance = new sendx\Api\EventApi(
     new GuzzleHttp\Client(),
     $config
 );
-$custom_event_request = new \sendx\model\CustomEventRequest(); // \sendx\model\CustomEventRequest
+$team_id = 'team_id_example'; // string | The unique identifier for the team.
+$id = 'id_example'; // string | The unique sendx identifier for the contact/customer.
+$amount = 3.4; // float | The revenue amount to be posted back.
+$campaign_id = 'campaign_id_example'; // string | The unique identifier for the campaign.
 
 try {
-    $result = $apiInstance->pushCustomEvent($custom_event_request);
+    $result = $apiInstance->eventsRevenuePostbackGet($team_id, $id, $amount, $campaign_id);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling EventApi->pushCustomEvent: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling EventApi->eventsRevenuePostbackGet: ', $e->getMessage(), PHP_EOL;
 }
 ```
 
@@ -113,19 +122,22 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **custom_event_request** | [**\sendx\model\CustomEventRequest**](../Model/CustomEventRequest.md)|  | |
+| **team_id** | **string**| The unique identifier for the team. | |
+| **id** | **string**| The unique sendx identifier for the contact/customer. | |
+| **amount** | **float**| The revenue amount to be posted back. | |
+| **campaign_id** | **string**| The unique identifier for the campaign. | |
 
 ### Return type
 
-[**\sendx\model\EventResponse**](../Model/EventResponse.md)
+[**\sendx\model\EventsRevenuePostbackGet200Response**](../Model/EventsRevenuePostbackGet200Response.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
-- **Content-Type**: `application/json`
+- **Content-Type**: Not defined
 - **Accept**: `application/json`
 
 [[Back to top]](#) [[Back to API list]](../../README.md#endpoints)

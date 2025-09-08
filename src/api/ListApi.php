@@ -1,7 +1,7 @@
 <?php
 /**
  * ListApi
- * PHP version 7.4
+ * PHP version 8.1
  *
  * @category Class
  * @package  sendx
@@ -12,12 +12,12 @@
 /**
  * SendX REST API
  *
- * # Introduction SendX is an email marketing product. It helps you convert website visitors to customers, send them promotional emails, engage with them using drip sequences and craft custom journeys using powerful but simple automations. The SendX API is organized around REST. Our API has predictable resource-oriented URLs, accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs. The SendX Rest API doesn’t support bulk updates. You can work on only one object per request. <br>
+ * # SendX REST API Documentation  ## 🚀 Introduction  The SendX API is organized around REST principles. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.  **Key Features:** - 🔒 **Security**: Team-based authentication with optional member-level access - 🎯 **Resource-Oriented**: RESTful design with clear resource boundaries - 📊 **Rich Data Models**: Three-layer model system (Input/Output/Internal) - 🔗 **Relationships**: Automatic prefix handling for resource relationships - 📈 **Scalable**: Built for high-volume email marketing operations  ## 🏗️ Architecture Overview  SendX uses a three-layer model architecture:  1. **Input Models** (`RestE*`): For API requests 2. **Output Models** (`RestR*`): For API responses with prefixed IDs 3. **Internal Models**: Core business logic (not exposed in API)  ## 🔐 Security & Authentication  SendX uses API key authentication:  ### Team API Key ```http X-Team-ApiKey: YOUR_TEAM_API_KEY ``` - **Required for all requests** - Team-level access to resources - Available in SendX Settings → Team API Key  ## 🆔 Encrypted ID System  SendX uses encrypted IDs for security and better developer experience:  - **Internal IDs**: Sequential integers (not exposed) - **Encrypted IDs**: 22-character alphanumeric strings - **Prefixed IDs**: Resource-type prefixes in API responses (`contact_<22-char-id>`)  ### ID Format  **All resource IDs follow this pattern:** ``` <resource_prefix>_<22_character_alphanumeric_string> ```  **Example:** ```json {   \"id\": \"contact_BnKjkbBBS500CoBCP0oChQ\",   \"lists\": [\"list_OcuxJHdiAvujmwQVJfd3ss\", \"list_0tOFLp5RgV7s3LNiHrjGYs\"],   \"tags\": [\"tag_UhsDkjL772Qbj5lWtT62VK\", \"tag_fL7t9lsnZ9swvx2HrtQ9wM\"] } ```  ## 📚 Resource Prefixes  | Resource | Prefix | Example | |----------|--------|---------| | Contact | `contact_` | `contact_BnKjkbBBS500CoBCP0oChQ` | | Campaign | `campaign_` | `campaign_LUE9BTxmksSmqHWbh96zsn` | | List | `list_` | `list_OcuxJHdiAvujmwQVJfd3ss` | | Tag | `tag_` | `tag_UhsDkjL772Qbj5lWtT62VK` | | Sender | `sender_` | `sender_4vK3WFhMgvOwUNyaL4QxCD` | | Template | `template_` | `template_f3lJvTEhSjKGVb5Lwc5SWS` | | Custom Field | `field_` | `field_MnuqBAG2NPLm7PZMWbjQxt` | | Webhook | `webhook_` | `webhook_9l154iiXlZoPo7vngmamee` | | Post | `post_` | `post_XyZ123aBc456DeF789GhI` | | Post Category | `post_category_` | `post_category_YzS1wOU20yw87UUHKxMzwn` | | Post Tag | `post_tag_` | `post_tag_123XyZ456AbC` | | Member | `member_` | `member_JkL012MnO345PqR678` |  ## 🎯 Best Practices  ### Error Handling - **Always check status codes**: 2xx = success, 4xx = client error, 5xx = server error - **Read error messages**: Descriptive messages help debug issues - **Handle rate limits**: Respect API rate limits for optimal performance  ### Data Validation - **Email format**: Must be valid email addresses - **Required fields**: Check documentation for mandatory fields - **Field lengths**: Respect maximum length constraints  ### Performance - **Pagination**: Use offset/limit for large datasets - **Batch operations**: Process multiple items when supported - **Caching**: Cache responses when appropriate  ## 🛠️ SDKs & Integration  Official SDKs available for: - [Golang](https://github.com/sendx/sendx-go-sdk) - [Python](https://github.com/sendx/sendx-python-sdk) - [Ruby](https://github.com/sendx/sendx-ruby-sdk) - [Java](https://github.com/sendx/sendx-java-sdk) - [PHP](https://github.com/sendx/sendx-php-sdk) - [JavaScript](https://github.com/sendx/sendx-javascript-sdk)  ## 📞 Support  Need help? Contact us: - 💬 **Website Chat**: Available on sendx.io - 📧 **Email**: hello@sendx.io - 📚 **Documentation**: Full guides at help.sendx.io  ---  **API Endpoint:** `https://api.sendx.io/api/v1/rest`  [<img src=\"https://run.pstmn.io/button.svg\" alt=\"Run In Postman\" style=\"width: 128px; height: 32px;\">](https://god.gw.postman.com/run-collection/33476323-44b198b0-5219-4619-a01f-cfc24d573885?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D33476323-44b198b0-5219-4619-a01f-cfc24d573885%26entityType%3Dcollection%26workspaceId%3D6b1e4f65-96a9-4136-9512-6266c852517e)
  *
  * The version of the OpenAPI document: 1.0.0
- * Contact: support@sendx.io
+ * Contact: hello@sendx.io
  * Generated by: https://openapi-generator.tech
- * Generator version: 7.8.0
+ * Generator version: 7.13.0
  */
 
 /**
@@ -35,8 +35,11 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use sendx\ApiException;
 use sendx\Configuration;
+use sendx\FormDataProcessor;
 use sendx\HeaderSelector;
 use sendx\ObjectSerializer;
 
@@ -81,7 +84,7 @@ class ListApi
         'getAllLists' => [
             'application/json',
         ],
-        'getListById' => [
+        'getList' => [
             'application/json',
         ],
         'updateList' => [
@@ -96,13 +99,13 @@ class ListApi
      * @param int             $hostIndex (Optional) host index to select the list of hosts if defined in the OpenAPI spec
      */
     public function __construct(
-        ClientInterface $client = null,
-        Configuration $config = null,
-        HeaderSelector $selector = null,
-        $hostIndex = 0
+        ?ClientInterface $client = null,
+        ?Configuration $config = null,
+        ?HeaderSelector $selector = null,
+        int $hostIndex = 0
     ) {
         $this->client = $client ?: new Client();
-        $this->config = $config ?: new Configuration();
+        $this->config = $config ?: Configuration::getDefaultConfiguration();
         $this->headerSelector = $selector ?: new HeaderSelector();
         $this->hostIndex = $hostIndex;
     }
@@ -138,36 +141,36 @@ class ListApi
     /**
      * Operation createList
      *
-     * Create List
+     * Create list
      *
-     * @param  \sendx\model\ListRequest $list_request list_request (required)
+     * @param  \sendx\model\RestEList $rest_e_list rest_e_list (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createList'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\CreateResponse
+     * @return \sendx\model\RestRList|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function createList($list_request, string $contentType = self::contentTypes['createList'][0])
+    public function createList($rest_e_list, string $contentType = self::contentTypes['createList'][0])
     {
-        list($response) = $this->createListWithHttpInfo($list_request, $contentType);
+        list($response) = $this->createListWithHttpInfo($rest_e_list, $contentType);
         return $response;
     }
 
     /**
      * Operation createListWithHttpInfo
      *
-     * Create List
+     * Create list
      *
-     * @param  \sendx\model\ListRequest $list_request (required)
+     * @param  \sendx\model\RestEList $rest_e_list (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createList'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\CreateResponse, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRList|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function createListWithHttpInfo($list_request, string $contentType = self::contentTypes['createList'][0])
+    public function createListWithHttpInfo($rest_e_list, string $contentType = self::contentTypes['createList'][0])
     {
-        $request = $this->createListRequest($list_request, $contentType);
+        $request = $this->createListRequest($rest_e_list, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -191,6 +194,48 @@ class ListApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 201:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRList',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 403:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 422:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -204,75 +249,64 @@ class ListApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\CreateResponse' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\CreateResponse' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\CreateResponse', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\CreateResponse';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRList',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
-                case 200:
+                case 201:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\CreateResponse',
+                        '\sendx\model\RestRList',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 403:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 422:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -280,17 +314,17 @@ class ListApi
     /**
      * Operation createListAsync
      *
-     * Create List
+     * Create list
      *
-     * @param  \sendx\model\ListRequest $list_request (required)
+     * @param  \sendx\model\RestEList $rest_e_list (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createListAsync($list_request, string $contentType = self::contentTypes['createList'][0])
+    public function createListAsync($rest_e_list, string $contentType = self::contentTypes['createList'][0])
     {
-        return $this->createListAsyncWithHttpInfo($list_request, $contentType)
+        return $this->createListAsyncWithHttpInfo($rest_e_list, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -301,18 +335,18 @@ class ListApi
     /**
      * Operation createListAsyncWithHttpInfo
      *
-     * Create List
+     * Create list
      *
-     * @param  \sendx\model\ListRequest $list_request (required)
+     * @param  \sendx\model\RestEList $rest_e_list (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createListAsyncWithHttpInfo($list_request, string $contentType = self::contentTypes['createList'][0])
+    public function createListAsyncWithHttpInfo($rest_e_list, string $contentType = self::contentTypes['createList'][0])
     {
-        $returnType = '\sendx\model\CreateResponse';
-        $request = $this->createListRequest($list_request, $contentType);
+        $returnType = '\sendx\model\RestRList';
+        $request = $this->createListRequest($rest_e_list, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -353,19 +387,19 @@ class ListApi
     /**
      * Create request for operation 'createList'
      *
-     * @param  \sendx\model\ListRequest $list_request (required)
+     * @param  \sendx\model\RestEList $rest_e_list (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function createListRequest($list_request, string $contentType = self::contentTypes['createList'][0])
+    public function createListRequest($rest_e_list, string $contentType = self::contentTypes['createList'][0])
     {
 
-        // verify the required parameter 'list_request' is set
-        if ($list_request === null || (is_array($list_request) && count($list_request) === 0)) {
+        // verify the required parameter 'rest_e_list' is set
+        if ($rest_e_list === null || (is_array($rest_e_list) && count($rest_e_list) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $list_request when calling createList'
+                'Missing the required parameter $rest_e_list when calling createList'
             );
         }
 
@@ -388,12 +422,12 @@ class ListApi
         );
 
         // for model (json/xml)
-        if (isset($list_request)) {
+        if (isset($rest_e_list)) {
             if (stripos($headers['Content-Type'], 'application/json') !== false) {
                 # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($list_request));
+                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($rest_e_list));
             } else {
-                $httpBody = $list_request;
+                $httpBody = $rest_e_list;
             }
         } elseif (count($formParams) > 0) {
             if ($multipart) {
@@ -449,36 +483,36 @@ class ListApi
     /**
      * Operation deleteList
      *
-     * Delete List
+     * Delete list
      *
-     * @param  string $list_id The ID of the list you want to delete (required)
+     * @param  string $identifier List identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteList'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\DeleteResponse
+     * @return \sendx\model\DeleteResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function deleteList($list_id, string $contentType = self::contentTypes['deleteList'][0])
+    public function deleteList($identifier, string $contentType = self::contentTypes['deleteList'][0])
     {
-        list($response) = $this->deleteListWithHttpInfo($list_id, $contentType);
+        list($response) = $this->deleteListWithHttpInfo($identifier, $contentType);
         return $response;
     }
 
     /**
      * Operation deleteListWithHttpInfo
      *
-     * Delete List
+     * Delete list
      *
-     * @param  string $list_id The ID of the list you want to delete (required)
+     * @param  string $identifier List identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteList'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\DeleteResponse, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\DeleteResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function deleteListWithHttpInfo($list_id, string $contentType = self::contentTypes['deleteList'][0])
+    public function deleteListWithHttpInfo($identifier, string $contentType = self::contentTypes['deleteList'][0])
     {
-        $request = $this->deleteListRequest($list_id, $contentType);
+        $request = $this->deleteListRequest($identifier, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -502,6 +536,42 @@ class ListApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\DeleteResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 422:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -515,64 +585,11 @@ class ListApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\DeleteResponse' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\DeleteResponse' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\DeleteResponse', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\DeleteResponse';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\DeleteResponse',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
@@ -582,8 +599,42 @@ class ListApi
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 422:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -591,17 +642,17 @@ class ListApi
     /**
      * Operation deleteListAsync
      *
-     * Delete List
+     * Delete list
      *
-     * @param  string $list_id The ID of the list you want to delete (required)
+     * @param  string $identifier List identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function deleteListAsync($list_id, string $contentType = self::contentTypes['deleteList'][0])
+    public function deleteListAsync($identifier, string $contentType = self::contentTypes['deleteList'][0])
     {
-        return $this->deleteListAsyncWithHttpInfo($list_id, $contentType)
+        return $this->deleteListAsyncWithHttpInfo($identifier, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -612,18 +663,18 @@ class ListApi
     /**
      * Operation deleteListAsyncWithHttpInfo
      *
-     * Delete List
+     * Delete list
      *
-     * @param  string $list_id The ID of the list you want to delete (required)
+     * @param  string $identifier List identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function deleteListAsyncWithHttpInfo($list_id, string $contentType = self::contentTypes['deleteList'][0])
+    public function deleteListAsyncWithHttpInfo($identifier, string $contentType = self::contentTypes['deleteList'][0])
     {
         $returnType = '\sendx\model\DeleteResponse';
-        $request = $this->deleteListRequest($list_id, $contentType);
+        $request = $this->deleteListRequest($identifier, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -664,24 +715,27 @@ class ListApi
     /**
      * Create request for operation 'deleteList'
      *
-     * @param  string $list_id The ID of the list you want to delete (required)
+     * @param  string $identifier List identifier to delete (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function deleteListRequest($list_id, string $contentType = self::contentTypes['deleteList'][0])
+    public function deleteListRequest($identifier, string $contentType = self::contentTypes['deleteList'][0])
     {
 
-        // verify the required parameter 'list_id' is set
-        if ($list_id === null || (is_array($list_id) && count($list_id) === 0)) {
+        // verify the required parameter 'identifier' is set
+        if ($identifier === null || (is_array($identifier) && count($identifier) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $list_id when calling deleteList'
+                'Missing the required parameter $identifier when calling deleteList'
             );
         }
+        if (!preg_match("/^(list_)?[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling ListApi.deleteList, must conform to the pattern /^(list_)?[a-zA-Z0-9]{22}$/.");
+        }
+        
 
-
-        $resourcePath = '/list/{listId}';
+        $resourcePath = '/list/{identifier}';
         $formParams = [];
         $queryParams = [];
         $headerParams = [];
@@ -691,10 +745,10 @@ class ListApi
 
 
         // path params
-        if ($list_id !== null) {
+        if ($identifier !== null) {
             $resourcePath = str_replace(
-                '{' . 'listId' . '}',
-                ObjectSerializer::toPathValue($list_id),
+                '{' . 'identifier' . '}',
+                ObjectSerializer::toPathValue($identifier),
                 $resourcePath
             );
         }
@@ -761,18 +815,18 @@ class ListApi
     /**
      * Operation getAllLists
      *
-     * Get All Lists
+     * Get all lists
      *
-     * @param  int $offset Offset for pagination. (optional)
-     * @param  int $limit Limit the number of results returned. (optional)
-     * @param  string $search Search term to filter lists. (optional)
+     * @param  int|null $offset Number of records to skip for pagination (optional, default to 0)
+     * @param  int|null $limit Maximum number of lists to return (max: 500) (optional, default to 10)
+     * @param  string|null $search Search lists by name (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllLists'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\ListModel[]
+     * @return \sendx\model\RestRList[]|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function getAllLists($offset = null, $limit = null, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
+    public function getAllLists($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
     {
         list($response) = $this->getAllListsWithHttpInfo($offset, $limit, $search, $contentType);
         return $response;
@@ -781,18 +835,18 @@ class ListApi
     /**
      * Operation getAllListsWithHttpInfo
      *
-     * Get All Lists
+     * Get all lists
      *
-     * @param  int $offset Offset for pagination. (optional)
-     * @param  int $limit Limit the number of results returned. (optional)
-     * @param  string $search Search term to filter lists. (optional)
+     * @param  int|null $offset Number of records to skip for pagination (optional, default to 0)
+     * @param  int|null $limit Maximum number of lists to return (max: 500) (optional, default to 10)
+     * @param  string|null $search Search lists by name (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllLists'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\ListModel[], HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRList[]|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function getAllListsWithHttpInfo($offset = null, $limit = null, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
+    public function getAllListsWithHttpInfo($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
     {
         $request = $this->getAllListsRequest($offset, $limit, $search, $contentType);
 
@@ -818,6 +872,30 @@ class ListApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRList[]',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -831,75 +909,40 @@ class ListApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\ListModel[]' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\ListModel[]' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\ListModel[]', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\ListModel[]';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRList[]',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\ListModel[]',
+                        '\sendx\model\RestRList[]',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -907,17 +950,17 @@ class ListApi
     /**
      * Operation getAllListsAsync
      *
-     * Get All Lists
+     * Get all lists
      *
-     * @param  int $offset Offset for pagination. (optional)
-     * @param  int $limit Limit the number of results returned. (optional)
-     * @param  string $search Search term to filter lists. (optional)
+     * @param  int|null $offset Number of records to skip for pagination (optional, default to 0)
+     * @param  int|null $limit Maximum number of lists to return (max: 500) (optional, default to 10)
+     * @param  string|null $search Search lists by name (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllLists'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getAllListsAsync($offset = null, $limit = null, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
+    public function getAllListsAsync($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
     {
         return $this->getAllListsAsyncWithHttpInfo($offset, $limit, $search, $contentType)
             ->then(
@@ -930,19 +973,19 @@ class ListApi
     /**
      * Operation getAllListsAsyncWithHttpInfo
      *
-     * Get All Lists
+     * Get all lists
      *
-     * @param  int $offset Offset for pagination. (optional)
-     * @param  int $limit Limit the number of results returned. (optional)
-     * @param  string $search Search term to filter lists. (optional)
+     * @param  int|null $offset Number of records to skip for pagination (optional, default to 0)
+     * @param  int|null $limit Maximum number of lists to return (max: 500) (optional, default to 10)
+     * @param  string|null $search Search lists by name (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllLists'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getAllListsAsyncWithHttpInfo($offset = null, $limit = null, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
+    public function getAllListsAsyncWithHttpInfo($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
     {
-        $returnType = '\sendx\model\ListModel[]';
+        $returnType = '\sendx\model\RestRList[]';
         $request = $this->getAllListsRequest($offset, $limit, $search, $contentType);
 
         return $this->client
@@ -984,20 +1027,35 @@ class ListApi
     /**
      * Create request for operation 'getAllLists'
      *
-     * @param  int $offset Offset for pagination. (optional)
-     * @param  int $limit Limit the number of results returned. (optional)
-     * @param  string $search Search term to filter lists. (optional)
+     * @param  int|null $offset Number of records to skip for pagination (optional, default to 0)
+     * @param  int|null $limit Maximum number of lists to return (max: 500) (optional, default to 10)
+     * @param  string|null $search Search lists by name (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllLists'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function getAllListsRequest($offset = null, $limit = null, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
+    public function getAllListsRequest($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllLists'][0])
     {
 
-
-
-
+        if ($offset !== null && $offset < 0) {
+            throw new \InvalidArgumentException('invalid value for "$offset" when calling ListApi.getAllLists, must be bigger than or equal to 0.');
+        }
+        
+        if ($limit !== null && $limit > 100) {
+            throw new \InvalidArgumentException('invalid value for "$limit" when calling ListApi.getAllLists, must be smaller than or equal to 100.');
+        }
+        if ($limit !== null && $limit < 1) {
+            throw new \InvalidArgumentException('invalid value for "$limit" when calling ListApi.getAllLists, must be bigger than or equal to 1.');
+        }
+        
+        if ($search !== null && strlen($search) > 100) {
+            throw new \InvalidArgumentException('invalid length for "$search" when calling ListApi.getAllLists, must be smaller than or equal to 100.');
+        }
+        if ($search !== null && strlen($search) < 2) {
+            throw new \InvalidArgumentException('invalid length for "$search" when calling ListApi.getAllLists, must be bigger than or equal to 2.');
+        }
+        
 
         $resourcePath = '/list';
         $formParams = [];
@@ -1096,38 +1154,38 @@ class ListApi
     }
 
     /**
-     * Operation getListById
+     * Operation getList
      *
-     * Get List
+     * Get list by ID
      *
-     * @param  string $list_id The ID of the list you want to retrieve (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getListById'] to see the possible values for this operation
+     * @param  string $identifier List identifier - &#x60;list_OcuxJHdiAvujmwQVJfd3ss&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getList'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\ListModel
+     * @return \sendx\model\RestRList|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function getListById($list_id, string $contentType = self::contentTypes['getListById'][0])
+    public function getList($identifier, string $contentType = self::contentTypes['getList'][0])
     {
-        list($response) = $this->getListByIdWithHttpInfo($list_id, $contentType);
+        list($response) = $this->getListWithHttpInfo($identifier, $contentType);
         return $response;
     }
 
     /**
-     * Operation getListByIdWithHttpInfo
+     * Operation getListWithHttpInfo
      *
-     * Get List
+     * Get list by ID
      *
-     * @param  string $list_id The ID of the list you want to retrieve (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getListById'] to see the possible values for this operation
+     * @param  string $identifier List identifier - &#x60;list_OcuxJHdiAvujmwQVJfd3ss&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getList'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\ListModel, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRList|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function getListByIdWithHttpInfo($list_id, string $contentType = self::contentTypes['getListById'][0])
+    public function getListWithHttpInfo($identifier, string $contentType = self::contentTypes['getList'][0])
     {
-        $request = $this->getListByIdRequest($list_id, $contentType);
+        $request = $this->getListRequest($identifier, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -1151,6 +1209,42 @@ class ListApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRList',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 422:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -1164,93 +1258,74 @@ class ListApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\ListModel' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\ListModel' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\ListModel', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\ListModel';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRList',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\ListModel',
+                        '\sendx\model\RestRList',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 422:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
 
     /**
-     * Operation getListByIdAsync
+     * Operation getListAsync
      *
-     * Get List
+     * Get list by ID
      *
-     * @param  string $list_id The ID of the list you want to retrieve (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getListById'] to see the possible values for this operation
+     * @param  string $identifier List identifier - &#x60;list_OcuxJHdiAvujmwQVJfd3ss&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getListByIdAsync($list_id, string $contentType = self::contentTypes['getListById'][0])
+    public function getListAsync($identifier, string $contentType = self::contentTypes['getList'][0])
     {
-        return $this->getListByIdAsyncWithHttpInfo($list_id, $contentType)
+        return $this->getListAsyncWithHttpInfo($identifier, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -1259,20 +1334,20 @@ class ListApi
     }
 
     /**
-     * Operation getListByIdAsyncWithHttpInfo
+     * Operation getListAsyncWithHttpInfo
      *
-     * Get List
+     * Get list by ID
      *
-     * @param  string $list_id The ID of the list you want to retrieve (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getListById'] to see the possible values for this operation
+     * @param  string $identifier List identifier - &#x60;list_OcuxJHdiAvujmwQVJfd3ss&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getListByIdAsyncWithHttpInfo($list_id, string $contentType = self::contentTypes['getListById'][0])
+    public function getListAsyncWithHttpInfo($identifier, string $contentType = self::contentTypes['getList'][0])
     {
-        $returnType = '\sendx\model\ListModel';
-        $request = $this->getListByIdRequest($list_id, $contentType);
+        $returnType = '\sendx\model\RestRList';
+        $request = $this->getListRequest($identifier, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -1311,26 +1386,29 @@ class ListApi
     }
 
     /**
-     * Create request for operation 'getListById'
+     * Create request for operation 'getList'
      *
-     * @param  string $list_id The ID of the list you want to retrieve (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getListById'] to see the possible values for this operation
+     * @param  string $identifier List identifier - &#x60;list_OcuxJHdiAvujmwQVJfd3ss&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function getListByIdRequest($list_id, string $contentType = self::contentTypes['getListById'][0])
+    public function getListRequest($identifier, string $contentType = self::contentTypes['getList'][0])
     {
 
-        // verify the required parameter 'list_id' is set
-        if ($list_id === null || (is_array($list_id) && count($list_id) === 0)) {
+        // verify the required parameter 'identifier' is set
+        if ($identifier === null || (is_array($identifier) && count($identifier) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $list_id when calling getListById'
+                'Missing the required parameter $identifier when calling getList'
             );
         }
+        if (!preg_match("/^(list_)?[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling ListApi.getList, must conform to the pattern /^(list_)?[a-zA-Z0-9]{22}$/.");
+        }
+        
 
-
-        $resourcePath = '/list/{listId}';
+        $resourcePath = '/list/{identifier}';
         $formParams = [];
         $queryParams = [];
         $headerParams = [];
@@ -1340,10 +1418,10 @@ class ListApi
 
 
         // path params
-        if ($list_id !== null) {
+        if ($identifier !== null) {
             $resourcePath = str_replace(
-                '{' . 'listId' . '}',
-                ObjectSerializer::toPathValue($list_id),
+                '{' . 'identifier' . '}',
+                ObjectSerializer::toPathValue($identifier),
                 $resourcePath
             );
         }
@@ -1410,38 +1488,38 @@ class ListApi
     /**
      * Operation updateList
      *
-     * Update List
+     * Update list
      *
-     * @param  \sendx\model\ListRequest $list_request list_request (required)
-     * @param  string $list_id The ID of the list to be updated. (required)
+     * @param  \sendx\model\RestEList $rest_e_list rest_e_list (required)
+     * @param  string $identifier List identifier to update (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateList'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Response
+     * @return \sendx\model\RestRList|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function updateList($list_request, $list_id, string $contentType = self::contentTypes['updateList'][0])
+    public function updateList($rest_e_list, $identifier, string $contentType = self::contentTypes['updateList'][0])
     {
-        list($response) = $this->updateListWithHttpInfo($list_request, $list_id, $contentType);
+        list($response) = $this->updateListWithHttpInfo($rest_e_list, $identifier, $contentType);
         return $response;
     }
 
     /**
      * Operation updateListWithHttpInfo
      *
-     * Update List
+     * Update list
      *
-     * @param  \sendx\model\ListRequest $list_request (required)
-     * @param  string $list_id The ID of the list to be updated. (required)
+     * @param  \sendx\model\RestEList $rest_e_list (required)
+     * @param  string $identifier List identifier to update (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateList'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Response, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRList|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function updateListWithHttpInfo($list_request, $list_id, string $contentType = self::contentTypes['updateList'][0])
+    public function updateListWithHttpInfo($rest_e_list, $identifier, string $contentType = self::contentTypes['updateList'][0])
     {
-        $request = $this->updateListRequest($list_request, $list_id, $contentType);
+        $request = $this->updateListRequest($rest_e_list, $identifier, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -1465,6 +1543,48 @@ class ListApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRList',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 403:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 422:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -1478,75 +1598,64 @@ class ListApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Response' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Response' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Response', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Response';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRList',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Response',
+                        '\sendx\model\RestRList',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 403:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 422:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -1554,18 +1663,18 @@ class ListApi
     /**
      * Operation updateListAsync
      *
-     * Update List
+     * Update list
      *
-     * @param  \sendx\model\ListRequest $list_request (required)
-     * @param  string $list_id The ID of the list to be updated. (required)
+     * @param  \sendx\model\RestEList $rest_e_list (required)
+     * @param  string $identifier List identifier to update (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function updateListAsync($list_request, $list_id, string $contentType = self::contentTypes['updateList'][0])
+    public function updateListAsync($rest_e_list, $identifier, string $contentType = self::contentTypes['updateList'][0])
     {
-        return $this->updateListAsyncWithHttpInfo($list_request, $list_id, $contentType)
+        return $this->updateListAsyncWithHttpInfo($rest_e_list, $identifier, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -1576,19 +1685,19 @@ class ListApi
     /**
      * Operation updateListAsyncWithHttpInfo
      *
-     * Update List
+     * Update list
      *
-     * @param  \sendx\model\ListRequest $list_request (required)
-     * @param  string $list_id The ID of the list to be updated. (required)
+     * @param  \sendx\model\RestEList $rest_e_list (required)
+     * @param  string $identifier List identifier to update (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function updateListAsyncWithHttpInfo($list_request, $list_id, string $contentType = self::contentTypes['updateList'][0])
+    public function updateListAsyncWithHttpInfo($rest_e_list, $identifier, string $contentType = self::contentTypes['updateList'][0])
     {
-        $returnType = '\sendx\model\Response';
-        $request = $this->updateListRequest($list_request, $list_id, $contentType);
+        $returnType = '\sendx\model\RestRList';
+        $request = $this->updateListRequest($rest_e_list, $identifier, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -1629,32 +1738,35 @@ class ListApi
     /**
      * Create request for operation 'updateList'
      *
-     * @param  \sendx\model\ListRequest $list_request (required)
-     * @param  string $list_id The ID of the list to be updated. (required)
+     * @param  \sendx\model\RestEList $rest_e_list (required)
+     * @param  string $identifier List identifier to update (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateList'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function updateListRequest($list_request, $list_id, string $contentType = self::contentTypes['updateList'][0])
+    public function updateListRequest($rest_e_list, $identifier, string $contentType = self::contentTypes['updateList'][0])
     {
 
-        // verify the required parameter 'list_request' is set
-        if ($list_request === null || (is_array($list_request) && count($list_request) === 0)) {
+        // verify the required parameter 'rest_e_list' is set
+        if ($rest_e_list === null || (is_array($rest_e_list) && count($rest_e_list) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $list_request when calling updateList'
+                'Missing the required parameter $rest_e_list when calling updateList'
             );
         }
 
-        // verify the required parameter 'list_id' is set
-        if ($list_id === null || (is_array($list_id) && count($list_id) === 0)) {
+        // verify the required parameter 'identifier' is set
+        if ($identifier === null || (is_array($identifier) && count($identifier) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $list_id when calling updateList'
+                'Missing the required parameter $identifier when calling updateList'
             );
         }
+        if (!preg_match("/^(list_)?[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling ListApi.updateList, must conform to the pattern /^(list_)?[a-zA-Z0-9]{22}$/.");
+        }
+        
 
-
-        $resourcePath = '/list/{listId}';
+        $resourcePath = '/list/{identifier}';
         $formParams = [];
         $queryParams = [];
         $headerParams = [];
@@ -1664,10 +1776,10 @@ class ListApi
 
 
         // path params
-        if ($list_id !== null) {
+        if ($identifier !== null) {
             $resourcePath = str_replace(
-                '{' . 'listId' . '}',
-                ObjectSerializer::toPathValue($list_id),
+                '{' . 'identifier' . '}',
+                ObjectSerializer::toPathValue($identifier),
                 $resourcePath
             );
         }
@@ -1680,12 +1792,12 @@ class ListApi
         );
 
         // for model (json/xml)
-        if (isset($list_request)) {
+        if (isset($rest_e_list)) {
             if (stripos($headers['Content-Type'], 'application/json') !== false) {
                 # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($list_request));
+                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($rest_e_list));
             } else {
-                $httpBody = $list_request;
+                $httpBody = $rest_e_list;
             }
         } elseif (count($formParams) > 0) {
             if ($multipart) {
@@ -1755,5 +1867,48 @@ class ListApi
         }
 
         return $options;
+    }
+
+    private function handleResponseWithDataType(
+        string $dataType,
+        RequestInterface $request,
+        ResponseInterface $response
+    ): array {
+        if ($dataType === '\SplFileObject') {
+            $content = $response->getBody(); //stream goes to serializer
+        } else {
+            $content = (string) $response->getBody();
+            if ($dataType !== 'string') {
+                try {
+                    $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
+                } catch (\JsonException $exception) {
+                    throw new ApiException(
+                        sprintf(
+                            'Error JSON decoding server response (%s)',
+                            $request->getUri()
+                        ),
+                        $response->getStatusCode(),
+                        $response->getHeaders(),
+                        $content
+                    );
+                }
+            }
+        }
+
+        return [
+            ObjectSerializer::deserialize($content, $dataType, []),
+            $response->getStatusCode(),
+            $response->getHeaders()
+        ];
+    }
+
+    private function responseWithinRangeCode(
+        string $rangeCode,
+        int $statusCode
+    ): bool {
+        $left = (int) ($rangeCode[0].'00');
+        $right = (int) ($rangeCode[0].'99');
+
+        return $statusCode >= $left && $statusCode <= $right;
     }
 }

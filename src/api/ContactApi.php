@@ -1,7 +1,7 @@
 <?php
 /**
  * ContactApi
- * PHP version 7.4
+ * PHP version 8.1
  *
  * @category Class
  * @package  sendx
@@ -12,12 +12,12 @@
 /**
  * SendX REST API
  *
- * # Introduction SendX is an email marketing product. It helps you convert website visitors to customers, send them promotional emails, engage with them using drip sequences and craft custom journeys using powerful but simple automations. The SendX API is organized around REST. Our API has predictable resource-oriented URLs, accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs. The SendX Rest API doesn’t support bulk updates. You can work on only one object per request. <br>
+ * # SendX REST API Documentation  ## 🚀 Introduction  The SendX API is organized around REST principles. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.  **Key Features:** - 🔒 **Security**: Team-based authentication with optional member-level access - 🎯 **Resource-Oriented**: RESTful design with clear resource boundaries - 📊 **Rich Data Models**: Three-layer model system (Input/Output/Internal) - 🔗 **Relationships**: Automatic prefix handling for resource relationships - 📈 **Scalable**: Built for high-volume email marketing operations  ## 🏗️ Architecture Overview  SendX uses a three-layer model architecture:  1. **Input Models** (`RestE*`): For API requests 2. **Output Models** (`RestR*`): For API responses with prefixed IDs 3. **Internal Models**: Core business logic (not exposed in API)  ## 🔐 Security & Authentication  SendX uses API key authentication:  ### Team API Key ```http X-Team-ApiKey: YOUR_TEAM_API_KEY ``` - **Required for all requests** - Team-level access to resources - Available in SendX Settings → Team API Key  ## 🆔 Encrypted ID System  SendX uses encrypted IDs for security and better developer experience:  - **Internal IDs**: Sequential integers (not exposed) - **Encrypted IDs**: 22-character alphanumeric strings - **Prefixed IDs**: Resource-type prefixes in API responses (`contact_<22-char-id>`)  ### ID Format  **All resource IDs follow this pattern:** ``` <resource_prefix>_<22_character_alphanumeric_string> ```  **Example:** ```json {   \"id\": \"contact_BnKjkbBBS500CoBCP0oChQ\",   \"lists\": [\"list_OcuxJHdiAvujmwQVJfd3ss\", \"list_0tOFLp5RgV7s3LNiHrjGYs\"],   \"tags\": [\"tag_UhsDkjL772Qbj5lWtT62VK\", \"tag_fL7t9lsnZ9swvx2HrtQ9wM\"] } ```  ## 📚 Resource Prefixes  | Resource | Prefix | Example | |----------|--------|---------| | Contact | `contact_` | `contact_BnKjkbBBS500CoBCP0oChQ` | | Campaign | `campaign_` | `campaign_LUE9BTxmksSmqHWbh96zsn` | | List | `list_` | `list_OcuxJHdiAvujmwQVJfd3ss` | | Tag | `tag_` | `tag_UhsDkjL772Qbj5lWtT62VK` | | Sender | `sender_` | `sender_4vK3WFhMgvOwUNyaL4QxCD` | | Template | `template_` | `template_f3lJvTEhSjKGVb5Lwc5SWS` | | Custom Field | `field_` | `field_MnuqBAG2NPLm7PZMWbjQxt` | | Webhook | `webhook_` | `webhook_9l154iiXlZoPo7vngmamee` | | Post | `post_` | `post_XyZ123aBc456DeF789GhI` | | Post Category | `post_category_` | `post_category_YzS1wOU20yw87UUHKxMzwn` | | Post Tag | `post_tag_` | `post_tag_123XyZ456AbC` | | Member | `member_` | `member_JkL012MnO345PqR678` |  ## 🎯 Best Practices  ### Error Handling - **Always check status codes**: 2xx = success, 4xx = client error, 5xx = server error - **Read error messages**: Descriptive messages help debug issues - **Handle rate limits**: Respect API rate limits for optimal performance  ### Data Validation - **Email format**: Must be valid email addresses - **Required fields**: Check documentation for mandatory fields - **Field lengths**: Respect maximum length constraints  ### Performance - **Pagination**: Use offset/limit for large datasets - **Batch operations**: Process multiple items when supported - **Caching**: Cache responses when appropriate  ## 🛠️ SDKs & Integration  Official SDKs available for: - [Golang](https://github.com/sendx/sendx-go-sdk) - [Python](https://github.com/sendx/sendx-python-sdk) - [Ruby](https://github.com/sendx/sendx-ruby-sdk) - [Java](https://github.com/sendx/sendx-java-sdk) - [PHP](https://github.com/sendx/sendx-php-sdk) - [JavaScript](https://github.com/sendx/sendx-javascript-sdk)  ## 📞 Support  Need help? Contact us: - 💬 **Website Chat**: Available on sendx.io - 📧 **Email**: hello@sendx.io - 📚 **Documentation**: Full guides at help.sendx.io  ---  **API Endpoint:** `https://api.sendx.io/api/v1/rest`  [<img src=\"https://run.pstmn.io/button.svg\" alt=\"Run In Postman\" style=\"width: 128px; height: 32px;\">](https://god.gw.postman.com/run-collection/33476323-44b198b0-5219-4619-a01f-cfc24d573885?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D33476323-44b198b0-5219-4619-a01f-cfc24d573885%26entityType%3Dcollection%26workspaceId%3D6b1e4f65-96a9-4136-9512-6266c852517e)
  *
  * The version of the OpenAPI document: 1.0.0
- * Contact: support@sendx.io
+ * Contact: hello@sendx.io
  * Generated by: https://openapi-generator.tech
- * Generator version: 7.8.0
+ * Generator version: 7.13.0
  */
 
 /**
@@ -35,8 +35,11 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use sendx\ApiException;
 use sendx\Configuration;
+use sendx\FormDataProcessor;
 use sendx\HeaderSelector;
 use sendx\ObjectSerializer;
 
@@ -81,7 +84,7 @@ class ContactApi
         'getAllContacts' => [
             'application/json',
         ],
-        'getContactById' => [
+        'getContact' => [
             'application/json',
         ],
         'unsubscribeContact' => [
@@ -99,13 +102,13 @@ class ContactApi
      * @param int             $hostIndex (Optional) host index to select the list of hosts if defined in the OpenAPI spec
      */
     public function __construct(
-        ClientInterface $client = null,
-        Configuration $config = null,
-        HeaderSelector $selector = null,
-        $hostIndex = 0
+        ?ClientInterface $client = null,
+        ?Configuration $config = null,
+        ?HeaderSelector $selector = null,
+        int $hostIndex = 0
     ) {
         $this->client = $client ?: new Client();
-        $this->config = $config ?: new Configuration();
+        $this->config = $config ?: Configuration::getDefaultConfiguration();
         $this->headerSelector = $selector ?: new HeaderSelector();
         $this->hostIndex = $hostIndex;
     }
@@ -141,36 +144,36 @@ class ContactApi
     /**
      * Operation createContact
      *
-     * Create a contact
+     * Create a new contact
      *
-     * @param  \sendx\model\ContactRequest $contact_request contact_request (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact rest_e_contact (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Response
+     * @return \sendx\model\RestRContact|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function createContact($contact_request, string $contentType = self::contentTypes['createContact'][0])
+    public function createContact($rest_e_contact, string $contentType = self::contentTypes['createContact'][0])
     {
-        list($response) = $this->createContactWithHttpInfo($contact_request, $contentType);
+        list($response) = $this->createContactWithHttpInfo($rest_e_contact, $contentType);
         return $response;
     }
 
     /**
      * Operation createContactWithHttpInfo
      *
-     * Create a contact
+     * Create a new contact
      *
-     * @param  \sendx\model\ContactRequest $contact_request (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Response, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRContact|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function createContactWithHttpInfo($contact_request, string $contentType = self::contentTypes['createContact'][0])
+    public function createContactWithHttpInfo($rest_e_contact, string $contentType = self::contentTypes['createContact'][0])
     {
-        $request = $this->createContactRequest($contact_request, $contentType);
+        $request = $this->createContactRequest($rest_e_contact, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -194,6 +197,48 @@ class ContactApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 201:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRContact',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 409:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 422:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -207,75 +252,64 @@ class ContactApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Response' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Response' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Response', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Response';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRContact',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
-                case 200:
+                case 201:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Response',
+                        '\sendx\model\RestRContact',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 409:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 422:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -283,17 +317,17 @@ class ContactApi
     /**
      * Operation createContactAsync
      *
-     * Create a contact
+     * Create a new contact
      *
-     * @param  \sendx\model\ContactRequest $contact_request (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createContactAsync($contact_request, string $contentType = self::contentTypes['createContact'][0])
+    public function createContactAsync($rest_e_contact, string $contentType = self::contentTypes['createContact'][0])
     {
-        return $this->createContactAsyncWithHttpInfo($contact_request, $contentType)
+        return $this->createContactAsyncWithHttpInfo($rest_e_contact, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -304,18 +338,18 @@ class ContactApi
     /**
      * Operation createContactAsyncWithHttpInfo
      *
-     * Create a contact
+     * Create a new contact
      *
-     * @param  \sendx\model\ContactRequest $contact_request (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createContactAsyncWithHttpInfo($contact_request, string $contentType = self::contentTypes['createContact'][0])
+    public function createContactAsyncWithHttpInfo($rest_e_contact, string $contentType = self::contentTypes['createContact'][0])
     {
-        $returnType = '\sendx\model\Response';
-        $request = $this->createContactRequest($contact_request, $contentType);
+        $returnType = '\sendx\model\RestRContact';
+        $request = $this->createContactRequest($rest_e_contact, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -356,19 +390,19 @@ class ContactApi
     /**
      * Create request for operation 'createContact'
      *
-     * @param  \sendx\model\ContactRequest $contact_request (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function createContactRequest($contact_request, string $contentType = self::contentTypes['createContact'][0])
+    public function createContactRequest($rest_e_contact, string $contentType = self::contentTypes['createContact'][0])
     {
 
-        // verify the required parameter 'contact_request' is set
-        if ($contact_request === null || (is_array($contact_request) && count($contact_request) === 0)) {
+        // verify the required parameter 'rest_e_contact' is set
+        if ($rest_e_contact === null || (is_array($rest_e_contact) && count($rest_e_contact) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $contact_request when calling createContact'
+                'Missing the required parameter $rest_e_contact when calling createContact'
             );
         }
 
@@ -391,12 +425,12 @@ class ContactApi
         );
 
         // for model (json/xml)
-        if (isset($contact_request)) {
+        if (isset($rest_e_contact)) {
             if (stripos($headers['Content-Type'], 'application/json') !== false) {
                 # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($contact_request));
+                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($rest_e_contact));
             } else {
-                $httpBody = $contact_request;
+                $httpBody = $rest_e_contact;
             }
         } elseif (count($formParams) > 0) {
             if ($multipart) {
@@ -452,14 +486,14 @@ class ContactApi
     /**
      * Operation deleteContact
      *
-     * Delete Contact
+     * Delete contact
      *
-     * @param  string $identifier The Contact ID/ Email to delete (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Response
+     * @return \sendx\model\DeleteResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
     public function deleteContact($identifier, string $contentType = self::contentTypes['deleteContact'][0])
     {
@@ -470,14 +504,14 @@ class ContactApi
     /**
      * Operation deleteContactWithHttpInfo
      *
-     * Delete Contact
+     * Delete contact
      *
-     * @param  string $identifier The Contact ID/ Email to delete (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Response, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\DeleteResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
     public function deleteContactWithHttpInfo($identifier, string $contentType = self::contentTypes['deleteContact'][0])
     {
@@ -505,6 +539,42 @@ class ContactApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\DeleteResponse',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -518,75 +588,56 @@ class ContactApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Response' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Response' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Response', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Response';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\DeleteResponse',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Response',
+                        '\sendx\model\DeleteResponse',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -594,9 +645,9 @@ class ContactApi
     /**
      * Operation deleteContactAsync
      *
-     * Delete Contact
+     * Delete contact
      *
-     * @param  string $identifier The Contact ID/ Email to delete (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
@@ -615,9 +666,9 @@ class ContactApi
     /**
      * Operation deleteContactAsyncWithHttpInfo
      *
-     * Delete Contact
+     * Delete contact
      *
-     * @param  string $identifier The Contact ID/ Email to delete (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
@@ -625,7 +676,7 @@ class ContactApi
      */
     public function deleteContactAsyncWithHttpInfo($identifier, string $contentType = self::contentTypes['deleteContact'][0])
     {
-        $returnType = '\sendx\model\Response';
+        $returnType = '\sendx\model\DeleteResponse';
         $request = $this->deleteContactRequest($identifier, $contentType);
 
         return $this->client
@@ -667,7 +718,7 @@ class ContactApi
     /**
      * Create request for operation 'deleteContact'
      *
-     * @param  string $identifier The Contact ID/ Email to delete (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['deleteContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
@@ -682,7 +733,10 @@ class ContactApi
                 'Missing the required parameter $identifier when calling deleteContact'
             );
         }
-
+        if (!preg_match("/^[a-z_]+_[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling ContactApi.deleteContact, must conform to the pattern /^[a-z_]+_[a-zA-Z0-9]{22}$/.");
+        }
+        
 
         $resourcePath = '/contact/{identifier}';
         $formParams = [];
@@ -764,42 +818,40 @@ class ContactApi
     /**
      * Operation getAllContacts
      *
-     * Get All Contacts
+     * Get all contacts
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 10)
-     * @param  string $contact_type Filter contacts by type (optional)
-     * @param  string $search Search term to filter contacts (optional)
+     * @param  int|null $offset Number of records to skip for pagination.  **Examples:** - &#x60;0&#x60; - First page (default) - &#x60;50&#x60; - Second page (with limit&#x3D;50) - &#x60;100&#x60; - Third page (with limit&#x3D;50) (optional, default to 0)
+     * @param  int|null $limit Maximum number of records to return.  **Constraints:** - Minimum: 1 - Maximum: 100 - Default: 10 (optional, default to 50)
+     * @param  string|null $search Search term to filter contacts by name or email.  **Search Behavior:** - Searches firstName, lastName, and email fields - Case-insensitive partial matching - Minimum 2 characters for search  **Examples:** - &#x60;john&#x60; - Finds \&quot;John Doe\&quot;, \&quot;johnson@example.com\&quot; - &#x60;@company.com&#x60; - Finds all emails from company.com - &#x60;smith&#x60; - Finds \&quot;John Smith\&quot;, \&quot;smith@email.com\&quot; (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllContacts'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Contact[]
+     * @return \sendx\model\RestRContact[]|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function getAllContacts($offset = 0, $limit = 10, $contact_type = null, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
+    public function getAllContacts($offset = 0, $limit = 50, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
     {
-        list($response) = $this->getAllContactsWithHttpInfo($offset, $limit, $contact_type, $search, $contentType);
+        list($response) = $this->getAllContactsWithHttpInfo($offset, $limit, $search, $contentType);
         return $response;
     }
 
     /**
      * Operation getAllContactsWithHttpInfo
      *
-     * Get All Contacts
+     * Get all contacts
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 10)
-     * @param  string $contact_type Filter contacts by type (optional)
-     * @param  string $search Search term to filter contacts (optional)
+     * @param  int|null $offset Number of records to skip for pagination.  **Examples:** - &#x60;0&#x60; - First page (default) - &#x60;50&#x60; - Second page (with limit&#x3D;50) - &#x60;100&#x60; - Third page (with limit&#x3D;50) (optional, default to 0)
+     * @param  int|null $limit Maximum number of records to return.  **Constraints:** - Minimum: 1 - Maximum: 100 - Default: 10 (optional, default to 50)
+     * @param  string|null $search Search term to filter contacts by name or email.  **Search Behavior:** - Searches firstName, lastName, and email fields - Case-insensitive partial matching - Minimum 2 characters for search  **Examples:** - &#x60;john&#x60; - Finds \&quot;John Doe\&quot;, \&quot;johnson@example.com\&quot; - &#x60;@company.com&#x60; - Finds all emails from company.com - &#x60;smith&#x60; - Finds \&quot;John Smith\&quot;, \&quot;smith@email.com\&quot; (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllContacts'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Contact[], HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRContact[]|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function getAllContactsWithHttpInfo($offset = 0, $limit = 10, $contact_type = null, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
+    public function getAllContactsWithHttpInfo($offset = 0, $limit = 50, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
     {
-        $request = $this->getAllContactsRequest($offset, $limit, $contact_type, $search, $contentType);
+        $request = $this->getAllContactsRequest($offset, $limit, $search, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -823,6 +875,36 @@ class ContactApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRContact[]',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -836,75 +918,48 @@ class ContactApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Contact[]' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Contact[]' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Contact[]', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Contact[]';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRContact[]',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Contact[]',
+                        '\sendx\model\RestRContact[]',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -912,20 +967,19 @@ class ContactApi
     /**
      * Operation getAllContactsAsync
      *
-     * Get All Contacts
+     * Get all contacts
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 10)
-     * @param  string $contact_type Filter contacts by type (optional)
-     * @param  string $search Search term to filter contacts (optional)
+     * @param  int|null $offset Number of records to skip for pagination.  **Examples:** - &#x60;0&#x60; - First page (default) - &#x60;50&#x60; - Second page (with limit&#x3D;50) - &#x60;100&#x60; - Third page (with limit&#x3D;50) (optional, default to 0)
+     * @param  int|null $limit Maximum number of records to return.  **Constraints:** - Minimum: 1 - Maximum: 100 - Default: 10 (optional, default to 50)
+     * @param  string|null $search Search term to filter contacts by name or email.  **Search Behavior:** - Searches firstName, lastName, and email fields - Case-insensitive partial matching - Minimum 2 characters for search  **Examples:** - &#x60;john&#x60; - Finds \&quot;John Doe\&quot;, \&quot;johnson@example.com\&quot; - &#x60;@company.com&#x60; - Finds all emails from company.com - &#x60;smith&#x60; - Finds \&quot;John Smith\&quot;, \&quot;smith@email.com\&quot; (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllContacts'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getAllContactsAsync($offset = 0, $limit = 10, $contact_type = null, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
+    public function getAllContactsAsync($offset = 0, $limit = 50, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
     {
-        return $this->getAllContactsAsyncWithHttpInfo($offset, $limit, $contact_type, $search, $contentType)
+        return $this->getAllContactsAsyncWithHttpInfo($offset, $limit, $search, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -936,21 +990,20 @@ class ContactApi
     /**
      * Operation getAllContactsAsyncWithHttpInfo
      *
-     * Get All Contacts
+     * Get all contacts
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 10)
-     * @param  string $contact_type Filter contacts by type (optional)
-     * @param  string $search Search term to filter contacts (optional)
+     * @param  int|null $offset Number of records to skip for pagination.  **Examples:** - &#x60;0&#x60; - First page (default) - &#x60;50&#x60; - Second page (with limit&#x3D;50) - &#x60;100&#x60; - Third page (with limit&#x3D;50) (optional, default to 0)
+     * @param  int|null $limit Maximum number of records to return.  **Constraints:** - Minimum: 1 - Maximum: 100 - Default: 10 (optional, default to 50)
+     * @param  string|null $search Search term to filter contacts by name or email.  **Search Behavior:** - Searches firstName, lastName, and email fields - Case-insensitive partial matching - Minimum 2 characters for search  **Examples:** - &#x60;john&#x60; - Finds \&quot;John Doe\&quot;, \&quot;johnson@example.com\&quot; - &#x60;@company.com&#x60; - Finds all emails from company.com - &#x60;smith&#x60; - Finds \&quot;John Smith\&quot;, \&quot;smith@email.com\&quot; (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllContacts'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getAllContactsAsyncWithHttpInfo($offset = 0, $limit = 10, $contact_type = null, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
+    public function getAllContactsAsyncWithHttpInfo($offset = 0, $limit = 50, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
     {
-        $returnType = '\sendx\model\Contact[]';
-        $request = $this->getAllContactsRequest($offset, $limit, $contact_type, $search, $contentType);
+        $returnType = '\sendx\model\RestRContact[]';
+        $request = $this->getAllContactsRequest($offset, $limit, $search, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -991,22 +1044,35 @@ class ContactApi
     /**
      * Create request for operation 'getAllContacts'
      *
-     * @param  int $offset Offset for pagination (optional, default to 0)
-     * @param  int $limit Limit for pagination (optional, default to 10)
-     * @param  string $contact_type Filter contacts by type (optional)
-     * @param  string $search Search term to filter contacts (optional)
+     * @param  int|null $offset Number of records to skip for pagination.  **Examples:** - &#x60;0&#x60; - First page (default) - &#x60;50&#x60; - Second page (with limit&#x3D;50) - &#x60;100&#x60; - Third page (with limit&#x3D;50) (optional, default to 0)
+     * @param  int|null $limit Maximum number of records to return.  **Constraints:** - Minimum: 1 - Maximum: 100 - Default: 10 (optional, default to 50)
+     * @param  string|null $search Search term to filter contacts by name or email.  **Search Behavior:** - Searches firstName, lastName, and email fields - Case-insensitive partial matching - Minimum 2 characters for search  **Examples:** - &#x60;john&#x60; - Finds \&quot;John Doe\&quot;, \&quot;johnson@example.com\&quot; - &#x60;@company.com&#x60; - Finds all emails from company.com - &#x60;smith&#x60; - Finds \&quot;John Smith\&quot;, \&quot;smith@email.com\&quot; (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllContacts'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function getAllContactsRequest($offset = 0, $limit = 10, $contact_type = null, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
+    public function getAllContactsRequest($offset = 0, $limit = 50, $search = null, string $contentType = self::contentTypes['getAllContacts'][0])
     {
 
-
-
-
-
+        if ($offset !== null && $offset < 0) {
+            throw new \InvalidArgumentException('invalid value for "$offset" when calling ContactApi.getAllContacts, must be bigger than or equal to 0.');
+        }
+        
+        if ($limit !== null && $limit > 1000) {
+            throw new \InvalidArgumentException('invalid value for "$limit" when calling ContactApi.getAllContacts, must be smaller than or equal to 1000.');
+        }
+        if ($limit !== null && $limit < 1) {
+            throw new \InvalidArgumentException('invalid value for "$limit" when calling ContactApi.getAllContacts, must be bigger than or equal to 1.');
+        }
+        
+        if ($search !== null && strlen($search) > 255) {
+            throw new \InvalidArgumentException('invalid length for "$search" when calling ContactApi.getAllContacts, must be smaller than or equal to 255.');
+        }
+        if ($search !== null && strlen($search) < 2) {
+            throw new \InvalidArgumentException('invalid length for "$search" when calling ContactApi.getAllContacts, must be bigger than or equal to 2.');
+        }
+        
 
         $resourcePath = '/contact';
         $formParams = [];
@@ -1029,15 +1095,6 @@ class ContactApi
             $limit,
             'limit', // param base name
             'integer', // openApiType
-            'form', // style
-            true, // explode
-            false // required
-        ) ?? []);
-        // query params
-        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
-            $contact_type,
-            'contactType', // param base name
-            'string', // openApiType
             'form', // style
             true, // explode
             false // required
@@ -1114,38 +1171,38 @@ class ContactApi
     }
 
     /**
-     * Operation getContactById
+     * Operation getContact
      *
-     * Get Contact by Identifier
+     * Get contact by ID
      *
-     * @param  string $identifier The ID or Email of the contact to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContactById'] to see the possible values for this operation
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Contact
+     * @return \sendx\model\RestRContact|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function getContactById($identifier, string $contentType = self::contentTypes['getContactById'][0])
+    public function getContact($identifier, string $contentType = self::contentTypes['getContact'][0])
     {
-        list($response) = $this->getContactByIdWithHttpInfo($identifier, $contentType);
+        list($response) = $this->getContactWithHttpInfo($identifier, $contentType);
         return $response;
     }
 
     /**
-     * Operation getContactByIdWithHttpInfo
+     * Operation getContactWithHttpInfo
      *
-     * Get Contact by Identifier
+     * Get contact by ID
      *
-     * @param  string $identifier The ID or Email of the contact to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContactById'] to see the possible values for this operation
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Contact, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRContact|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function getContactByIdWithHttpInfo($identifier, string $contentType = self::contentTypes['getContactById'][0])
+    public function getContactWithHttpInfo($identifier, string $contentType = self::contentTypes['getContact'][0])
     {
-        $request = $this->getContactByIdRequest($identifier, $contentType);
+        $request = $this->getContactRequest($identifier, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -1169,6 +1226,42 @@ class ContactApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRContact',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -1182,93 +1275,74 @@ class ContactApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Contact' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Contact' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Contact', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Contact';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRContact',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Contact',
+                        '\sendx\model\RestRContact',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
 
     /**
-     * Operation getContactByIdAsync
+     * Operation getContactAsync
      *
-     * Get Contact by Identifier
+     * Get contact by ID
      *
-     * @param  string $identifier The ID or Email of the contact to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContactById'] to see the possible values for this operation
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getContactByIdAsync($identifier, string $contentType = self::contentTypes['getContactById'][0])
+    public function getContactAsync($identifier, string $contentType = self::contentTypes['getContact'][0])
     {
-        return $this->getContactByIdAsyncWithHttpInfo($identifier, $contentType)
+        return $this->getContactAsyncWithHttpInfo($identifier, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -1277,20 +1351,20 @@ class ContactApi
     }
 
     /**
-     * Operation getContactByIdAsyncWithHttpInfo
+     * Operation getContactAsyncWithHttpInfo
      *
-     * Get Contact by Identifier
+     * Get contact by ID
      *
-     * @param  string $identifier The ID or Email of the contact to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContactById'] to see the possible values for this operation
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getContactByIdAsyncWithHttpInfo($identifier, string $contentType = self::contentTypes['getContactById'][0])
+    public function getContactAsyncWithHttpInfo($identifier, string $contentType = self::contentTypes['getContact'][0])
     {
-        $returnType = '\sendx\model\Contact';
-        $request = $this->getContactByIdRequest($identifier, $contentType);
+        $returnType = '\sendx\model\RestRContact';
+        $request = $this->getContactRequest($identifier, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -1329,24 +1403,27 @@ class ContactApi
     }
 
     /**
-     * Create request for operation 'getContactById'
+     * Create request for operation 'getContact'
      *
-     * @param  string $identifier The ID or Email of the contact to retrieve. (required)
-     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContactById'] to see the possible values for this operation
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
+     * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function getContactByIdRequest($identifier, string $contentType = self::contentTypes['getContactById'][0])
+    public function getContactRequest($identifier, string $contentType = self::contentTypes['getContact'][0])
     {
 
         // verify the required parameter 'identifier' is set
         if ($identifier === null || (is_array($identifier) && count($identifier) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $identifier when calling getContactById'
+                'Missing the required parameter $identifier when calling getContact'
             );
         }
-
+        if (!preg_match("/^[a-z_]+_[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling ContactApi.getContact, must conform to the pattern /^[a-z_]+_[a-zA-Z0-9]{22}$/.");
+        }
+        
 
         $resourcePath = '/contact/{identifier}';
         $formParams = [];
@@ -1428,14 +1505,14 @@ class ContactApi
     /**
      * Operation unsubscribeContact
      *
-     * Unsubscribe Contact
+     * Unsubscribe contact
      *
-     * @param  string $identifier The Contact ID or email to unsubscribe (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['unsubscribeContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Response
+     * @return \sendx\model\MessageResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
     public function unsubscribeContact($identifier, string $contentType = self::contentTypes['unsubscribeContact'][0])
     {
@@ -1446,14 +1523,14 @@ class ContactApi
     /**
      * Operation unsubscribeContactWithHttpInfo
      *
-     * Unsubscribe Contact
+     * Unsubscribe contact
      *
-     * @param  string $identifier The Contact ID or email to unsubscribe (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['unsubscribeContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Response, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\MessageResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
     public function unsubscribeContactWithHttpInfo($identifier, string $contentType = self::contentTypes['unsubscribeContact'][0])
     {
@@ -1481,6 +1558,42 @@ class ContactApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\MessageResponse',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -1494,75 +1607,56 @@ class ContactApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Response' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Response' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Response', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Response';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\MessageResponse',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Response',
+                        '\sendx\model\MessageResponse',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -1570,9 +1664,9 @@ class ContactApi
     /**
      * Operation unsubscribeContactAsync
      *
-     * Unsubscribe Contact
+     * Unsubscribe contact
      *
-     * @param  string $identifier The Contact ID or email to unsubscribe (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['unsubscribeContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
@@ -1591,9 +1685,9 @@ class ContactApi
     /**
      * Operation unsubscribeContactAsyncWithHttpInfo
      *
-     * Unsubscribe Contact
+     * Unsubscribe contact
      *
-     * @param  string $identifier The Contact ID or email to unsubscribe (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['unsubscribeContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
@@ -1601,7 +1695,7 @@ class ContactApi
      */
     public function unsubscribeContactAsyncWithHttpInfo($identifier, string $contentType = self::contentTypes['unsubscribeContact'][0])
     {
-        $returnType = '\sendx\model\Response';
+        $returnType = '\sendx\model\MessageResponse';
         $request = $this->unsubscribeContactRequest($identifier, $contentType);
 
         return $this->client
@@ -1643,7 +1737,7 @@ class ContactApi
     /**
      * Create request for operation 'unsubscribeContact'
      *
-     * @param  string $identifier The Contact ID or email to unsubscribe (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['unsubscribeContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
@@ -1658,7 +1752,10 @@ class ContactApi
                 'Missing the required parameter $identifier when calling unsubscribeContact'
             );
         }
-
+        if (!preg_match("/^[a-z_]+_[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling ContactApi.unsubscribeContact, must conform to the pattern /^[a-z_]+_[a-zA-Z0-9]{22}$/.");
+        }
+        
 
         $resourcePath = '/contact/unsubscribe/{identifier}';
         $formParams = [];
@@ -1740,38 +1837,38 @@ class ContactApi
     /**
      * Operation updateContact
      *
-     * Update Contact
+     * Update contact
      *
-     * @param  \sendx\model\ContactRequest $contact_request contact_request (required)
-     * @param  string $identifier The ID or email of the Contact to update (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact rest_e_contact (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Contact
+     * @return \sendx\model\RestRContact|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function updateContact($contact_request, $identifier, string $contentType = self::contentTypes['updateContact'][0])
+    public function updateContact($rest_e_contact, $identifier, string $contentType = self::contentTypes['updateContact'][0])
     {
-        list($response) = $this->updateContactWithHttpInfo($contact_request, $identifier, $contentType);
+        list($response) = $this->updateContactWithHttpInfo($rest_e_contact, $identifier, $contentType);
         return $response;
     }
 
     /**
      * Operation updateContactWithHttpInfo
      *
-     * Update Contact
+     * Update contact
      *
-     * @param  \sendx\model\ContactRequest $contact_request (required)
-     * @param  string $identifier The ID or email of the Contact to update (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateContact'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Contact, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRContact|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function updateContactWithHttpInfo($contact_request, $identifier, string $contentType = self::contentTypes['updateContact'][0])
+    public function updateContactWithHttpInfo($rest_e_contact, $identifier, string $contentType = self::contentTypes['updateContact'][0])
     {
-        $request = $this->updateContactRequest($contact_request, $identifier, $contentType);
+        $request = $this->updateContactRequest($rest_e_contact, $identifier, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -1795,6 +1892,54 @@ class ContactApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRContact',
+                        $request,
+                        $response,
+                    );
+                case 400:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 404:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 409:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 422:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -1808,75 +1953,72 @@ class ContactApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Contact' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Contact' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Contact', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Contact';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRContact',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Contact',
+                        '\sendx\model\RestRContact',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 400:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 404:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 409:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 422:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -1884,18 +2026,18 @@ class ContactApi
     /**
      * Operation updateContactAsync
      *
-     * Update Contact
+     * Update contact
      *
-     * @param  \sendx\model\ContactRequest $contact_request (required)
-     * @param  string $identifier The ID or email of the Contact to update (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function updateContactAsync($contact_request, $identifier, string $contentType = self::contentTypes['updateContact'][0])
+    public function updateContactAsync($rest_e_contact, $identifier, string $contentType = self::contentTypes['updateContact'][0])
     {
-        return $this->updateContactAsyncWithHttpInfo($contact_request, $identifier, $contentType)
+        return $this->updateContactAsyncWithHttpInfo($rest_e_contact, $identifier, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -1906,19 +2048,19 @@ class ContactApi
     /**
      * Operation updateContactAsyncWithHttpInfo
      *
-     * Update Contact
+     * Update contact
      *
-     * @param  \sendx\model\ContactRequest $contact_request (required)
-     * @param  string $identifier The ID or email of the Contact to update (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function updateContactAsyncWithHttpInfo($contact_request, $identifier, string $contentType = self::contentTypes['updateContact'][0])
+    public function updateContactAsyncWithHttpInfo($rest_e_contact, $identifier, string $contentType = self::contentTypes['updateContact'][0])
     {
-        $returnType = '\sendx\model\Contact';
-        $request = $this->updateContactRequest($contact_request, $identifier, $contentType);
+        $returnType = '\sendx\model\RestRContact';
+        $request = $this->updateContactRequest($rest_e_contact, $identifier, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -1959,20 +2101,20 @@ class ContactApi
     /**
      * Create request for operation 'updateContact'
      *
-     * @param  \sendx\model\ContactRequest $contact_request (required)
-     * @param  string $identifier The ID or email of the Contact to update (required)
+     * @param  \sendx\model\RestEContact $rest_e_contact (required)
+     * @param  string $identifier Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['updateContact'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function updateContactRequest($contact_request, $identifier, string $contentType = self::contentTypes['updateContact'][0])
+    public function updateContactRequest($rest_e_contact, $identifier, string $contentType = self::contentTypes['updateContact'][0])
     {
 
-        // verify the required parameter 'contact_request' is set
-        if ($contact_request === null || (is_array($contact_request) && count($contact_request) === 0)) {
+        // verify the required parameter 'rest_e_contact' is set
+        if ($rest_e_contact === null || (is_array($rest_e_contact) && count($rest_e_contact) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $contact_request when calling updateContact'
+                'Missing the required parameter $rest_e_contact when calling updateContact'
             );
         }
 
@@ -1982,7 +2124,10 @@ class ContactApi
                 'Missing the required parameter $identifier when calling updateContact'
             );
         }
-
+        if (!preg_match("/^[a-z_]+_[a-zA-Z0-9]{22}$/", $identifier)) {
+            throw new \InvalidArgumentException("invalid value for \"identifier\" when calling ContactApi.updateContact, must conform to the pattern /^[a-z_]+_[a-zA-Z0-9]{22}$/.");
+        }
+        
 
         $resourcePath = '/contact/{identifier}';
         $formParams = [];
@@ -2010,12 +2155,12 @@ class ContactApi
         );
 
         // for model (json/xml)
-        if (isset($contact_request)) {
+        if (isset($rest_e_contact)) {
             if (stripos($headers['Content-Type'], 'application/json') !== false) {
                 # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($contact_request));
+                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($rest_e_contact));
             } else {
-                $httpBody = $contact_request;
+                $httpBody = $rest_e_contact;
             }
         } elseif (count($formParams) > 0) {
             if ($multipart) {
@@ -2085,5 +2230,48 @@ class ContactApi
         }
 
         return $options;
+    }
+
+    private function handleResponseWithDataType(
+        string $dataType,
+        RequestInterface $request,
+        ResponseInterface $response
+    ): array {
+        if ($dataType === '\SplFileObject') {
+            $content = $response->getBody(); //stream goes to serializer
+        } else {
+            $content = (string) $response->getBody();
+            if ($dataType !== 'string') {
+                try {
+                    $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
+                } catch (\JsonException $exception) {
+                    throw new ApiException(
+                        sprintf(
+                            'Error JSON decoding server response (%s)',
+                            $request->getUri()
+                        ),
+                        $response->getStatusCode(),
+                        $response->getHeaders(),
+                        $content
+                    );
+                }
+            }
+        }
+
+        return [
+            ObjectSerializer::deserialize($content, $dataType, []),
+            $response->getStatusCode(),
+            $response->getHeaders()
+        ];
+    }
+
+    private function responseWithinRangeCode(
+        string $rangeCode,
+        int $statusCode
+    ): bool {
+        $left = (int) ($rangeCode[0].'00');
+        $right = (int) ($rangeCode[0].'99');
+
+        return $statusCode >= $left && $statusCode <= $right;
     }
 }

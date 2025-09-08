@@ -4,7 +4,7 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-| [**getCampaignReport()**](ReportsApi.md#getCampaignReport) | **GET** /report/campaign/{campaignId} | Get CampaignReport Data |
+| [**getCampaignReport()**](ReportsApi.md#getCampaignReport) | **GET** /report/campaign/{campaignId} | Get Campaign Report Data |
 
 
 ## `getCampaignReport()`
@@ -13,7 +13,7 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 getCampaignReport($campaign_id, $integration_type): \sendx\model\ReportData
 ```
 
-Get CampaignReport Data
+Get Campaign Report Data
 
 Retrieve the campaign report data based on the provided campaign id.
 

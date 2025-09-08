@@ -4,19 +4,19 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-| [**createSender()**](SenderApi.md#createSender) | **POST** /sender | Create Sender |
-| [**getAllSenders()**](SenderApi.md#getAllSenders) | **GET** /sender | Get All Senders |
+| [**createSender()**](SenderApi.md#createSender) | **POST** /sender | Create sender |
+| [**getAllSenders()**](SenderApi.md#getAllSenders) | **GET** /sender | Get all senders |
 
 
 ## `createSender()`
 
 ```php
-createSender($sender_request): \sendx\model\Sender
+createSender($rest_e_sender): \sendx\model\RestRSender
 ```
 
-Create Sender
+Create sender
 
-Creates a new sender in the system.
+Adds a new sender email address.
 
 ### Example
 
@@ -25,7 +25,7 @@ Creates a new sender in the system.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -37,10 +37,10 @@ $apiInstance = new sendx\Api\SenderApi(
     new GuzzleHttp\Client(),
     $config
 );
-$sender_request = new \sendx\model\SenderRequest(); // \sendx\model\SenderRequest
+$rest_e_sender = new \sendx\model\RestESender(); // \sendx\model\RestESender
 
 try {
-    $result = $apiInstance->createSender($sender_request);
+    $result = $apiInstance->createSender($rest_e_sender);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling SenderApi->createSender: ', $e->getMessage(), PHP_EOL;
@@ -51,15 +51,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **sender_request** | [**\sendx\model\SenderRequest**](../Model/SenderRequest.md)|  | |
+| **rest_e_sender** | [**\sendx\model\RestESender**](../Model/RestESender.md)|  | |
 
 ### Return type
 
-[**\sendx\model\Sender**](../Model/Sender.md)
+[**\sendx\model\RestRSender**](../Model/RestRSender.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -73,12 +73,12 @@ try {
 ## `getAllSenders()`
 
 ```php
-getAllSenders($offset, $limit, $search): \sendx\model\SenderResponse[]
+getAllSenders(): \sendx\model\RestRSender[]
 ```
 
-Get All Senders
+Get all senders
 
-Retrieve all senders for the team, with optional filters like offset, limit, and search.
+Retrieves all verified sender addresses.
 
 ### Example
 
@@ -87,7 +87,7 @@ Retrieve all senders for the team, with optional filters like offset, limit, and
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -99,12 +99,9 @@ $apiInstance = new sendx\Api\SenderApi(
     new GuzzleHttp\Client(),
     $config
 );
-$offset = 0; // int | Number of records to skip
-$limit = 10; // int | Maximum number of records to return
-$search = 'search_example'; // string | Search keyword to filter senders by name or email
 
 try {
-    $result = $apiInstance->getAllSenders($offset, $limit, $search);
+    $result = $apiInstance->getAllSenders();
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling SenderApi->getAllSenders: ', $e->getMessage(), PHP_EOL;
@@ -113,19 +110,15 @@ try {
 
 ### Parameters
 
-| Name | Type | Description  | Notes |
-| ------------- | ------------- | ------------- | ------------- |
-| **offset** | **int**| Number of records to skip | [optional] [default to 0] |
-| **limit** | **int**| Maximum number of records to return | [optional] [default to 10] |
-| **search** | **string**| Search keyword to filter senders by name or email | [optional] |
+This endpoint does not need any parameter.
 
 ### Return type
 
-[**\sendx\model\SenderResponse[]**](../Model/SenderResponse.md)
+[**\sendx\model\RestRSender[]**](../Model/RestRSender.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 

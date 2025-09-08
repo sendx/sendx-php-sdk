@@ -4,23 +4,23 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-| [**createContact()**](ContactApi.md#createContact) | **POST** /contact | Create a contact |
-| [**deleteContact()**](ContactApi.md#deleteContact) | **DELETE** /contact/{identifier} | Delete Contact |
-| [**getAllContacts()**](ContactApi.md#getAllContacts) | **GET** /contact | Get All Contacts |
-| [**getContactById()**](ContactApi.md#getContactById) | **GET** /contact/{identifier} | Get Contact by Identifier |
-| [**unsubscribeContact()**](ContactApi.md#unsubscribeContact) | **POST** /contact/unsubscribe/{identifier} | Unsubscribe Contact |
-| [**updateContact()**](ContactApi.md#updateContact) | **PUT** /contact/{identifier} | Update Contact |
+| [**createContact()**](ContactApi.md#createContact) | **POST** /contact | Create a new contact |
+| [**deleteContact()**](ContactApi.md#deleteContact) | **DELETE** /contact/{identifier} | Delete contact |
+| [**getAllContacts()**](ContactApi.md#getAllContacts) | **GET** /contact | Get all contacts |
+| [**getContact()**](ContactApi.md#getContact) | **GET** /contact/{identifier} | Get contact by ID |
+| [**unsubscribeContact()**](ContactApi.md#unsubscribeContact) | **POST** /contact/unsubscribe/{identifier} | Unsubscribe contact |
+| [**updateContact()**](ContactApi.md#updateContact) | **PUT** /contact/{identifier} | Update contact |
 
 
 ## `createContact()`
 
 ```php
-createContact($contact_request): \sendx\model\Response
+createContact($rest_e_contact): \sendx\model\RestRContact
 ```
 
-Create a contact
+Create a new contact
 
-Create Contact with given data
+Creates a new contact in your SendX team with the provided information.  **🎯 Key Features:** - Email validation and duplicate detection - Automatic relationship building with lists and tags - Smart custom field handling  **📋 Business Rules:** - Email is mandatory and must be unique within the team - Last tracked IP is stored for analytics
 
 ### Example
 
@@ -29,7 +29,7 @@ Create Contact with given data
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -41,10 +41,10 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$contact_request = new \sendx\model\ContactRequest(); // \sendx\model\ContactRequest
+$rest_e_contact = {"email":"john.doe@example.com"}; // \sendx\model\RestEContact
 
 try {
-    $result = $apiInstance->createContact($contact_request);
+    $result = $apiInstance->createContact($rest_e_contact);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ContactApi->createContact: ', $e->getMessage(), PHP_EOL;
@@ -55,15 +55,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **contact_request** | [**\sendx\model\ContactRequest**](../Model/ContactRequest.md)|  | |
+| **rest_e_contact** | [**\sendx\model\RestEContact**](../Model/RestEContact.md)|  | |
 
 ### Return type
 
-[**\sendx\model\Response**](../Model/Response.md)
+[**\sendx\model\RestRContact**](../Model/RestRContact.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -77,12 +77,12 @@ try {
 ## `deleteContact()`
 
 ```php
-deleteContact($identifier): \sendx\model\Response
+deleteContact($identifier): \sendx\model\DeleteResponse
 ```
 
-Delete Contact
+Delete contact
 
-Deletes Contact
+Soft deletes a contact from your team.  **🎯 Key Features:** - Soft delete preserves data - Removes from all lists - Cancels pending campaigns - Maintains historical data
 
 ### Example
 
@@ -91,7 +91,7 @@ Deletes Contact
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -103,7 +103,7 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$identifier = 'identifier_example'; // string | The Contact ID/ Email to delete
+$identifier = contact_BnKjkbBBS500CoBCP0oChQ; // string | Resource identifier with prefix (e.g., `contact_BnKjkbBBS500CoBCP0oChQ`)  **Format:** `<prefix>_<22-character-id>`
 
 try {
     $result = $apiInstance->deleteContact($identifier);
@@ -117,15 +117,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **identifier** | **string**| The Contact ID/ Email to delete | |
+| **identifier** | **string**| Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; | |
 
 ### Return type
 
-[**\sendx\model\Response**](../Model/Response.md)
+[**\sendx\model\DeleteResponse**](../Model/DeleteResponse.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -139,12 +139,12 @@ try {
 ## `getAllContacts()`
 
 ```php
-getAllContacts($offset, $limit, $contact_type, $search): \sendx\model\Contact[]
+getAllContacts($offset, $limit, $search): \sendx\model\RestRContact[]
 ```
 
-Get All Contacts
+Get all contacts
 
-Find all contacts with optional filters
+Retrieves a paginated list of all contacts in your team with optional filtering capabilities.  **🎯 Key Features:** - Pagination support with offset/limit - Search contacts by name or email - All relationships included (lists, tags, custom fields) - Prefixed IDs for easy integration  **📊 Pagination:** - Default limit: 10 contacts per page - Maximum limit: 100 contacts per page - Use offset for page navigation  **🔍 Search:** - Searches across firstName, lastName, and email fields - Case-insensitive partial matching - Combine with pagination for large datasets
 
 ### Example
 
@@ -153,7 +153,7 @@ Find all contacts with optional filters
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -165,13 +165,12 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$offset = 0; // int | Offset for pagination
-$limit = 10; // int | Limit for pagination
-$contact_type = 'contact_type_example'; // string | Filter contacts by type
-$search = 'search_example'; // string | Search term to filter contacts
+$offset = 0; // int | Number of records to skip for pagination.  **Examples:** - `0` - First page (default) - `50` - Second page (with limit=50) - `100` - Third page (with limit=50)
+$limit = 10; // int | Maximum number of records to return.  **Constraints:** - Minimum: 1 - Maximum: 100 - Default: 10
+$search = john; // string | Search term to filter contacts by name or email.  **Search Behavior:** - Searches firstName, lastName, and email fields - Case-insensitive partial matching - Minimum 2 characters for search  **Examples:** - `john` - Finds \"John Doe\", \"johnson@example.com\" - `@company.com` - Finds all emails from company.com - `smith` - Finds \"John Smith\", \"smith@email.com\"
 
 try {
-    $result = $apiInstance->getAllContacts($offset, $limit, $contact_type, $search);
+    $result = $apiInstance->getAllContacts($offset, $limit, $search);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ContactApi->getAllContacts: ', $e->getMessage(), PHP_EOL;
@@ -182,18 +181,17 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **offset** | **int**| Offset for pagination | [optional] [default to 0] |
-| **limit** | **int**| Limit for pagination | [optional] [default to 10] |
-| **contact_type** | **string**| Filter contacts by type | [optional] |
-| **search** | **string**| Search term to filter contacts | [optional] |
+| **offset** | **int**| Number of records to skip for pagination.  **Examples:** - &#x60;0&#x60; - First page (default) - &#x60;50&#x60; - Second page (with limit&#x3D;50) - &#x60;100&#x60; - Third page (with limit&#x3D;50) | [optional] [default to 0] |
+| **limit** | **int**| Maximum number of records to return.  **Constraints:** - Minimum: 1 - Maximum: 100 - Default: 10 | [optional] [default to 50] |
+| **search** | **string**| Search term to filter contacts by name or email.  **Search Behavior:** - Searches firstName, lastName, and email fields - Case-insensitive partial matching - Minimum 2 characters for search  **Examples:** - &#x60;john&#x60; - Finds \&quot;John Doe\&quot;, \&quot;johnson@example.com\&quot; - &#x60;@company.com&#x60; - Finds all emails from company.com - &#x60;smith&#x60; - Finds \&quot;John Smith\&quot;, \&quot;smith@email.com\&quot; | [optional] |
 
 ### Return type
 
-[**\sendx\model\Contact[]**](../Model/Contact.md)
+[**\sendx\model\RestRContact[]**](../Model/RestRContact.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -204,15 +202,15 @@ try {
 [[Back to Model list]](../../README.md#models)
 [[Back to README]](../../README.md)
 
-## `getContactById()`
+## `getContact()`
 
 ```php
-getContactById($identifier): \sendx\model\Contact
+getContact($identifier): \sendx\model\RestRContact
 ```
 
-Get Contact by Identifier
+Get contact by ID
 
-Retrieve a specific contact by its identifier.
+Retrieves detailed information about a specific contact.  **🎯 Key Features:** - Returns complete contact profile - Includes all lists and tags - Shows custom field values - Provides engagement metrics
 
 ### Example
 
@@ -221,7 +219,7 @@ Retrieve a specific contact by its identifier.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -233,13 +231,13 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$identifier = john@doe.com; // string | The ID or Email of the contact to retrieve.
+$identifier = contact_BnKjkbBBS500CoBCP0oChQ; // string | Resource identifier with prefix (e.g., `contact_BnKjkbBBS500CoBCP0oChQ`)  **Format:** `<prefix>_<22-character-id>`
 
 try {
-    $result = $apiInstance->getContactById($identifier);
+    $result = $apiInstance->getContact($identifier);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling ContactApi->getContactById: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling ContactApi->getContact: ', $e->getMessage(), PHP_EOL;
 }
 ```
 
@@ -247,15 +245,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **identifier** | **string**| The ID or Email of the contact to retrieve. | |
+| **identifier** | **string**| Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; | |
 
 ### Return type
 
-[**\sendx\model\Contact**](../Model/Contact.md)
+[**\sendx\model\RestRContact**](../Model/RestRContact.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -269,12 +267,12 @@ try {
 ## `unsubscribeContact()`
 
 ```php
-unsubscribeContact($identifier): \sendx\model\Response
+unsubscribeContact($identifier): \sendx\model\MessageResponse
 ```
 
-Unsubscribe Contact
+Unsubscribe contact
 
-Unsubscribe a globally existing contact
+Unsubscribes a contact from all marketing communications.  **🎯 Key Features:** - Marks contact as unsubscribed - Removes from all active campaigns - Maintains unsubscribe history - Complies with anti-spam regulations
 
 ### Example
 
@@ -283,7 +281,7 @@ Unsubscribe a globally existing contact
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -295,7 +293,7 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$identifier = sendx123; // string | The Contact ID or email to unsubscribe
+$identifier = contact_BnKjkbBBS500CoBCP0oChQ; // string | Resource identifier with prefix (e.g., `contact_BnKjkbBBS500CoBCP0oChQ`)  **Format:** `<prefix>_<22-character-id>`
 
 try {
     $result = $apiInstance->unsubscribeContact($identifier);
@@ -309,15 +307,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **identifier** | **string**| The Contact ID or email to unsubscribe | |
+| **identifier** | **string**| Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; | |
 
 ### Return type
 
-[**\sendx\model\Response**](../Model/Response.md)
+[**\sendx\model\MessageResponse**](../Model/MessageResponse.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -331,12 +329,12 @@ try {
 ## `updateContact()`
 
 ```php
-updateContact($contact_request, $identifier): \sendx\model\Contact
+updateContact($rest_e_contact, $identifier): \sendx\model\RestRContact
 ```
 
-Update Contact
+Update contact
 
-Update Contact with given data
+Updates an existing contact's information.  **🎯 Key Features:** - Partial updates supported - Add/remove lists and tags - Update custom fields - Change email address
 
 ### Example
 
@@ -345,7 +343,7 @@ Update Contact with given data
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -357,11 +355,11 @@ $apiInstance = new sendx\Api\ContactApi(
     new GuzzleHttp\Client(),
     $config
 );
-$contact_request = new \sendx\model\ContactRequest(); // \sendx\model\ContactRequest
-$identifier = sendxid123; // string | The ID or email of the Contact to update
+$rest_e_contact = {"firstName":"Alexander","lastName":"Johnson-Smith","company":"New Enterprise Corp"}; // \sendx\model\RestEContact
+$identifier = contact_BnKjkbBBS500CoBCP0oChQ; // string | Resource identifier with prefix (e.g., `contact_BnKjkbBBS500CoBCP0oChQ`)  **Format:** `<prefix>_<22-character-id>`
 
 try {
-    $result = $apiInstance->updateContact($contact_request, $identifier);
+    $result = $apiInstance->updateContact($rest_e_contact, $identifier);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ContactApi->updateContact: ', $e->getMessage(), PHP_EOL;
@@ -372,16 +370,16 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **contact_request** | [**\sendx\model\ContactRequest**](../Model/ContactRequest.md)|  | |
-| **identifier** | **string**| The ID or email of the Contact to update | |
+| **rest_e_contact** | [**\sendx\model\RestEContact**](../Model/RestEContact.md)|  | |
+| **identifier** | **string**| Resource identifier with prefix (e.g., &#x60;contact_BnKjkbBBS500CoBCP0oChQ&#x60;)  **Format:** &#x60;&lt;prefix&gt;_&lt;22-character-id&gt;&#x60; | |
 
 ### Return type
 
-[**\sendx\model\Contact**](../Model/Contact.md)
+[**\sendx\model\RestRContact**](../Model/RestRContact.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 

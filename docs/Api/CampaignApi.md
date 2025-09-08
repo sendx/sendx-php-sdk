@@ -4,22 +4,21 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-| [**createCampaign()**](CampaignApi.md#createCampaign) | **POST** /campaign | Create Campaign |
-| [**deleteCampaign()**](CampaignApi.md#deleteCampaign) | **DELETE** /campaign/{campaignId} | Delete Campaign |
-| [**editCampaign()**](CampaignApi.md#editCampaign) | **PUT** /campaign/{campaignId} | Edit Campaign |
-| [**getAllCampaigns()**](CampaignApi.md#getAllCampaigns) | **GET** /campaign | Get All Campaigns |
-| [**getCampaignById()**](CampaignApi.md#getCampaignById) | **GET** /campaign/{campaignId} | Get Campaign By Id |
+| [**createCampaign()**](CampaignApi.md#createCampaign) | **POST** /campaign | Create campaign |
+| [**deleteCampaign()**](CampaignApi.md#deleteCampaign) | **DELETE** /campaign/{identifier} | Delete campaign |
+| [**getAllCampaigns()**](CampaignApi.md#getAllCampaigns) | **GET** /campaign | Get all campaigns |
+| [**getCampaign()**](CampaignApi.md#getCampaign) | **GET** /campaign/{identifier} | Get campaign by ID |
 
 
 ## `createCampaign()`
 
 ```php
-createCampaign($campaign_request): \sendx\model\CreateResponse
+createCampaign($rest_e_campaign): \sendx\model\RestRCampaign
 ```
 
-Create Campaign
+Create campaign
 
-Create a new email campaign
+Creates a new email campaign.
 
 ### Example
 
@@ -28,7 +27,7 @@ Create a new email campaign
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -40,10 +39,10 @@ $apiInstance = new sendx\Api\CampaignApi(
     new GuzzleHttp\Client(),
     $config
 );
-$campaign_request = new \sendx\model\CampaignRequest(); // \sendx\model\CampaignRequest | The campaign content
+$rest_e_campaign = {"name":"Flash Sale Announcement","subject":"⚡ 24-Hour Flash Sale - {{contact.firstName}}, Save 50%!","sender":"sender_4vK3WFhMgvOwUNyaL4QxCD","previewText":"Limited time offer - Today only!","htmlCode":"<html><body><h1>Flash Sale!</h1><p>Hi {{contact.firstName}},</p><p>Don't miss our 24-hour flash sale!</p><a href='{{sale.url}}'>Shop Now</a></body></html>","plainText":"Flash Sale!\n\nHi {{contact.firstName}},\n\nDon't miss our 24-hour flash sale!\n\nShop now: {{sale.url}}","scheduleType":1,"includedLists":["list_0tOFLp5RgV7s3LNiHrjGYs","list_vUCjsUmrVXtSppS8rD0Ssq"],"excludedTags":["tag_unengaged"]}; // \sendx\model\RestECampaign
 
 try {
-    $result = $apiInstance->createCampaign($campaign_request);
+    $result = $apiInstance->createCampaign($rest_e_campaign);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling CampaignApi->createCampaign: ', $e->getMessage(), PHP_EOL;
@@ -54,15 +53,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **campaign_request** | [**\sendx\model\CampaignRequest**](../Model/CampaignRequest.md)| The campaign content | |
+| **rest_e_campaign** | [**\sendx\model\RestECampaign**](../Model/RestECampaign.md)|  | |
 
 ### Return type
 
-[**\sendx\model\CreateResponse**](../Model/CreateResponse.md)
+[**\sendx\model\RestRCampaign**](../Model/RestRCampaign.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -76,12 +75,12 @@ try {
 ## `deleteCampaign()`
 
 ```php
-deleteCampaign($campaign_id): \sendx\model\DeleteCampaign200Response
+deleteCampaign($identifier): \sendx\model\DeleteResponse
 ```
 
-Delete Campaign
+Delete campaign
 
-Deletes a specific campaign by its campaignId.
+Deletes a campaign.
 
 ### Example
 
@@ -90,7 +89,7 @@ Deletes a specific campaign by its campaignId.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -102,10 +101,10 @@ $apiInstance = new sendx\Api\CampaignApi(
     new GuzzleHttp\Client(),
     $config
 );
-$campaign_id = 'campaign_id_example'; // string | The ID of the campaign to delete
+$identifier = 'identifier_example'; // string | Campaign identifier to delete
 
 try {
-    $result = $apiInstance->deleteCampaign($campaign_id);
+    $result = $apiInstance->deleteCampaign($identifier);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling CampaignApi->deleteCampaign: ', $e->getMessage(), PHP_EOL;
@@ -116,15 +115,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **campaign_id** | **string**| The ID of the campaign to delete | |
+| **identifier** | **string**| Campaign identifier to delete | |
 
 ### Return type
 
-[**\sendx\model\DeleteCampaign200Response**](../Model/DeleteCampaign200Response.md)
+[**\sendx\model\DeleteResponse**](../Model/DeleteResponse.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -135,79 +134,15 @@ try {
 [[Back to Model list]](../../README.md#models)
 [[Back to README]](../../README.md)
 
-## `editCampaign()`
-
-```php
-editCampaign($campaign_request, $campaign_id): \sendx\model\Campaign
-```
-
-Edit Campaign
-
-Submit edited content for a specific campaign.
-
-### Example
-
-```php
-<?php
-require_once(__DIR__ . '/vendor/autoload.php');
-
-
-// Configure API key authorization: apiKeyAuth
-$config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
-// Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
-// $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
-
-
-$apiInstance = new sendx\Api\CampaignApi(
-    // If you want use custom http client, pass your client which implements `GuzzleHttp\ClientInterface`.
-    // This is optional, `GuzzleHttp\Client` will be used as default.
-    new GuzzleHttp\Client(),
-    $config
-);
-$campaign_request = new \sendx\model\CampaignRequest(); // \sendx\model\CampaignRequest
-$campaign_id = 'campaign_id_example'; // string | The ID of the campaign to edit
-
-try {
-    $result = $apiInstance->editCampaign($campaign_request, $campaign_id);
-    print_r($result);
-} catch (Exception $e) {
-    echo 'Exception when calling CampaignApi->editCampaign: ', $e->getMessage(), PHP_EOL;
-}
-```
-
-### Parameters
-
-| Name | Type | Description  | Notes |
-| ------------- | ------------- | ------------- | ------------- |
-| **campaign_request** | [**\sendx\model\CampaignRequest**](../Model/CampaignRequest.md)|  | |
-| **campaign_id** | **string**| The ID of the campaign to edit | |
-
-### Return type
-
-[**\sendx\model\Campaign**](../Model/Campaign.md)
-
-### Authorization
-
-[apiKeyAuth](../../README.md#apiKeyAuth)
-
-### HTTP request headers
-
-- **Content-Type**: `application/json`
-- **Accept**: `application/json`
-
-[[Back to top]](#) [[Back to API list]](../../README.md#endpoints)
-[[Back to Model list]](../../README.md#models)
-[[Back to README]](../../README.md)
-
 ## `getAllCampaigns()`
 
 ```php
-getAllCampaigns($offset, $limit, $search): \sendx\model\Campaign[]
+getAllCampaigns($offset, $limit, $campaign_type): \sendx\model\RestRCampaign[]
 ```
 
-Get All Campaigns
+Get all campaigns
 
-Retrieve a list of all campaigns.
+Retrieves a paginated list of all campaigns.
 
 ### Example
 
@@ -216,7 +151,7 @@ Retrieve a list of all campaigns.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -228,12 +163,12 @@ $apiInstance = new sendx\Api\CampaignApi(
     new GuzzleHttp\Client(),
     $config
 );
-$offset = 0; // int | Offset for pagination
-$limit = 20; // int | Limit for pagination
-$search = 'search_example'; // string | Search term to filter campaigns
+$offset = 0; // int | Number of campaigns to skip
+$limit = 10; // int | Maximum number of campaigns to return
+$campaign_type = 'all'; // string | Filter by campaign type
 
 try {
-    $result = $apiInstance->getAllCampaigns($offset, $limit, $search);
+    $result = $apiInstance->getAllCampaigns($offset, $limit, $campaign_type);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling CampaignApi->getAllCampaigns: ', $e->getMessage(), PHP_EOL;
@@ -244,17 +179,17 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **offset** | **int**| Offset for pagination | [optional] [default to 0] |
-| **limit** | **int**| Limit for pagination | [optional] [default to 20] |
-| **search** | **string**| Search term to filter campaigns | [optional] |
+| **offset** | **int**| Number of campaigns to skip | [optional] [default to 0] |
+| **limit** | **int**| Maximum number of campaigns to return | [optional] [default to 10] |
+| **campaign_type** | **string**| Filter by campaign type | [optional] [default to &#39;all&#39;] |
 
 ### Return type
 
-[**\sendx\model\Campaign[]**](../Model/Campaign.md)
+[**\sendx\model\RestRCampaign[]**](../Model/RestRCampaign.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -265,15 +200,15 @@ try {
 [[Back to Model list]](../../README.md#models)
 [[Back to README]](../../README.md)
 
-## `getCampaignById()`
+## `getCampaign()`
 
 ```php
-getCampaignById($campaign_id): \sendx\model\Campaign
+getCampaign($identifier): \sendx\model\RestRCampaign
 ```
 
-Get Campaign By Id
+Get campaign by ID
 
-Retrieve a specific campaign using its ID.
+Retrieves detailed information about a specific campaign.
 
 ### Example
 
@@ -282,7 +217,7 @@ Retrieve a specific campaign using its ID.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -294,13 +229,13 @@ $apiInstance = new sendx\Api\CampaignApi(
     new GuzzleHttp\Client(),
     $config
 );
-$campaign_id = 'campaign_id_example'; // string | The ID of the campaign to retrieve.
+$identifier = 'identifier_example'; // string | Campaign identifier - `campaign_IMBoxK2iB5sUdgiNOjqAMA`
 
 try {
-    $result = $apiInstance->getCampaignById($campaign_id);
+    $result = $apiInstance->getCampaign($identifier);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling CampaignApi->getCampaignById: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling CampaignApi->getCampaign: ', $e->getMessage(), PHP_EOL;
 }
 ```
 
@@ -308,15 +243,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **campaign_id** | **string**| The ID of the campaign to retrieve. | |
+| **identifier** | **string**| Campaign identifier - &#x60;campaign_IMBoxK2iB5sUdgiNOjqAMA&#x60; | |
 
 ### Return type
 
-[**\sendx\model\Campaign**](../Model/Campaign.md)
+[**\sendx\model\RestRCampaign**](../Model/RestRCampaign.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 

@@ -4,22 +4,22 @@ All URIs are relative to https://api.sendx.io/api/v1/rest, except if the operati
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-| [**createList()**](ListApi.md#createList) | **POST** /list | Create List |
-| [**deleteList()**](ListApi.md#deleteList) | **DELETE** /list/{listId} | Delete List |
-| [**getAllLists()**](ListApi.md#getAllLists) | **GET** /list | Get All Lists |
-| [**getListById()**](ListApi.md#getListById) | **GET** /list/{listId} | Get List |
-| [**updateList()**](ListApi.md#updateList) | **PUT** /list/{listId} | Update List |
+| [**createList()**](ListApi.md#createList) | **POST** /list | Create list |
+| [**deleteList()**](ListApi.md#deleteList) | **DELETE** /list/{identifier} | Delete list |
+| [**getAllLists()**](ListApi.md#getAllLists) | **GET** /list | Get all lists |
+| [**getList()**](ListApi.md#getList) | **GET** /list/{identifier} | Get list by ID |
+| [**updateList()**](ListApi.md#updateList) | **PUT** /list/{identifier} | Update list |
 
 
 ## `createList()`
 
 ```php
-createList($list_request): \sendx\model\CreateResponse
+createList($rest_e_list): \sendx\model\RestRList
 ```
 
-Create List
+Create list
 
-Create a new list.
+Creates a new contact list.
 
 ### Example
 
@@ -28,7 +28,7 @@ Create a new list.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -40,10 +40,10 @@ $apiInstance = new sendx\Api\ListApi(
     new GuzzleHttp\Client(),
     $config
 );
-$list_request = new \sendx\model\ListRequest(); // \sendx\model\ListRequest
+$rest_e_list = {"name":"Premium Members"}; // \sendx\model\RestEList
 
 try {
-    $result = $apiInstance->createList($list_request);
+    $result = $apiInstance->createList($rest_e_list);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ListApi->createList: ', $e->getMessage(), PHP_EOL;
@@ -54,15 +54,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **list_request** | [**\sendx\model\ListRequest**](../Model/ListRequest.md)|  | |
+| **rest_e_list** | [**\sendx\model\RestEList**](../Model/RestEList.md)|  | |
 
 ### Return type
 
-[**\sendx\model\CreateResponse**](../Model/CreateResponse.md)
+[**\sendx\model\RestRList**](../Model/RestRList.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -76,12 +76,12 @@ try {
 ## `deleteList()`
 
 ```php
-deleteList($list_id): \sendx\model\DeleteResponse
+deleteList($identifier): \sendx\model\DeleteResponse
 ```
 
-Delete List
+Delete list
 
-Deletes a specific list by its ID.
+Deletes a list.
 
 ### Example
 
@@ -90,7 +90,7 @@ Deletes a specific list by its ID.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -102,10 +102,10 @@ $apiInstance = new sendx\Api\ListApi(
     new GuzzleHttp\Client(),
     $config
 );
-$list_id = sendx123; // string | The ID of the list you want to delete
+$identifier = 'identifier_example'; // string | List identifier to delete
 
 try {
-    $result = $apiInstance->deleteList($list_id);
+    $result = $apiInstance->deleteList($identifier);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ListApi->deleteList: ', $e->getMessage(), PHP_EOL;
@@ -116,7 +116,7 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **list_id** | **string**| The ID of the list you want to delete | |
+| **identifier** | **string**| List identifier to delete | |
 
 ### Return type
 
@@ -124,7 +124,7 @@ try {
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -138,12 +138,12 @@ try {
 ## `getAllLists()`
 
 ```php
-getAllLists($offset, $limit, $search): \sendx\model\ListModel[]
+getAllLists($offset, $limit, $search): \sendx\model\RestRList[]
 ```
 
-Get All Lists
+Get all lists
 
-Retrieve all lists for the account.
+Retrieves all contact lists in your team.
 
 ### Example
 
@@ -152,7 +152,7 @@ Retrieve all lists for the account.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -164,9 +164,9 @@ $apiInstance = new sendx\Api\ListApi(
     new GuzzleHttp\Client(),
     $config
 );
-$offset = 0; // int | Offset for pagination.
-$limit = 10; // int | Limit the number of results returned.
-$search = Marketing; // string | Search term to filter lists.
+$offset = 0; // int | Number of records to skip for pagination
+$limit = 10; // int | Maximum number of lists to return (max: 500)
+$search = 'search_example'; // string | Search lists by name
 
 try {
     $result = $apiInstance->getAllLists($offset, $limit, $search);
@@ -180,17 +180,17 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **offset** | **int**| Offset for pagination. | [optional] |
-| **limit** | **int**| Limit the number of results returned. | [optional] |
-| **search** | **string**| Search term to filter lists. | [optional] |
+| **offset** | **int**| Number of records to skip for pagination | [optional] [default to 0] |
+| **limit** | **int**| Maximum number of lists to return (max: 500) | [optional] [default to 10] |
+| **search** | **string**| Search lists by name | [optional] |
 
 ### Return type
 
-[**\sendx\model\ListModel[]**](../Model/ListModel.md)
+[**\sendx\model\RestRList[]**](../Model/RestRList.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -201,15 +201,15 @@ try {
 [[Back to Model list]](../../README.md#models)
 [[Back to README]](../../README.md)
 
-## `getListById()`
+## `getList()`
 
 ```php
-getListById($list_id): \sendx\model\ListModel
+getList($identifier): \sendx\model\RestRList
 ```
 
-Get List
+Get list by ID
 
-Retrieve a specific list by its ID.
+Retrieves detailed information about a specific list.
 
 ### Example
 
@@ -218,7 +218,7 @@ Retrieve a specific list by its ID.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -230,13 +230,13 @@ $apiInstance = new sendx\Api\ListApi(
     new GuzzleHttp\Client(),
     $config
 );
-$list_id = sendx123; // string | The ID of the list you want to retrieve
+$identifier = 'identifier_example'; // string | List identifier - `list_OcuxJHdiAvujmwQVJfd3ss`
 
 try {
-    $result = $apiInstance->getListById($list_id);
+    $result = $apiInstance->getList($identifier);
     print_r($result);
 } catch (Exception $e) {
-    echo 'Exception when calling ListApi->getListById: ', $e->getMessage(), PHP_EOL;
+    echo 'Exception when calling ListApi->getList: ', $e->getMessage(), PHP_EOL;
 }
 ```
 
@@ -244,15 +244,15 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **list_id** | **string**| The ID of the list you want to retrieve | |
+| **identifier** | **string**| List identifier - &#x60;list_OcuxJHdiAvujmwQVJfd3ss&#x60; | |
 
 ### Return type
 
-[**\sendx\model\ListModel**](../Model/ListModel.md)
+[**\sendx\model\RestRList**](../Model/RestRList.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 
@@ -266,12 +266,12 @@ try {
 ## `updateList()`
 
 ```php
-updateList($list_request, $list_id): \sendx\model\Response
+updateList($rest_e_list, $identifier): \sendx\model\RestRList
 ```
 
-Update List
+Update list
 
-Update an existing list by its ID.
+Updates an existing list's settings.
 
 ### Example
 
@@ -280,7 +280,7 @@ Update an existing list by its ID.
 require_once(__DIR__ . '/vendor/autoload.php');
 
 
-// Configure API key authorization: apiKeyAuth
+// Configure API key authorization: TeamApiKey
 $config = sendx\Configuration::getDefaultConfiguration()->setApiKey('X-Team-ApiKey', 'YOUR_API_KEY');
 // Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
 // $config = sendx\Configuration::getDefaultConfiguration()->setApiKeyPrefix('X-Team-ApiKey', 'Bearer');
@@ -292,11 +292,11 @@ $apiInstance = new sendx\Api\ListApi(
     new GuzzleHttp\Client(),
     $config
 );
-$list_request = new \sendx\model\ListRequest(); // \sendx\model\ListRequest
-$list_id = 'list_id_example'; // string | The ID of the list to be updated.
+$rest_e_list = {"name":"2024 Newsletter Subscribers"}; // \sendx\model\RestEList
+$identifier = 'identifier_example'; // string | List identifier to update
 
 try {
-    $result = $apiInstance->updateList($list_request, $list_id);
+    $result = $apiInstance->updateList($rest_e_list, $identifier);
     print_r($result);
 } catch (Exception $e) {
     echo 'Exception when calling ListApi->updateList: ', $e->getMessage(), PHP_EOL;
@@ -307,16 +307,16 @@ try {
 
 | Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |
-| **list_request** | [**\sendx\model\ListRequest**](../Model/ListRequest.md)|  | |
-| **list_id** | **string**| The ID of the list to be updated. | |
+| **rest_e_list** | [**\sendx\model\RestEList**](../Model/RestEList.md)|  | |
+| **identifier** | **string**| List identifier to update | |
 
 ### Return type
 
-[**\sendx\model\Response**](../Model/Response.md)
+[**\sendx\model\RestRList**](../Model/RestRList.md)
 
 ### Authorization
 
-[apiKeyAuth](../../README.md#apiKeyAuth)
+[TeamApiKey](../../README.md#TeamApiKey)
 
 ### HTTP request headers
 

@@ -2,7 +2,7 @@
 /**
  * IdentifyRequest
  *
- * PHP version 7.4
+ * PHP version 8.1
  *
  * @category Class
  * @package  sendx
@@ -13,12 +13,12 @@
 /**
  * SendX REST API
  *
- * # Introduction SendX is an email marketing product. It helps you convert website visitors to customers, send them promotional emails, engage with them using drip sequences and craft custom journeys using powerful but simple automations. The SendX API is organized around REST. Our API has predictable resource-oriented URLs, accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs. The SendX Rest API doesn’t support bulk updates. You can work on only one object per request. <br>
+ * # SendX REST API Documentation  ## 🚀 Introduction  The SendX API is organized around REST principles. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.  **Key Features:** - 🔒 **Security**: Team-based authentication with optional member-level access - 🎯 **Resource-Oriented**: RESTful design with clear resource boundaries - 📊 **Rich Data Models**: Three-layer model system (Input/Output/Internal) - 🔗 **Relationships**: Automatic prefix handling for resource relationships - 📈 **Scalable**: Built for high-volume email marketing operations  ## 🏗️ Architecture Overview  SendX uses a three-layer model architecture:  1. **Input Models** (`RestE*`): For API requests 2. **Output Models** (`RestR*`): For API responses with prefixed IDs 3. **Internal Models**: Core business logic (not exposed in API)  ## 🔐 Security & Authentication  SendX uses API key authentication:  ### Team API Key ```http X-Team-ApiKey: YOUR_TEAM_API_KEY ``` - **Required for all requests** - Team-level access to resources - Available in SendX Settings → Team API Key  ## 🆔 Encrypted ID System  SendX uses encrypted IDs for security and better developer experience:  - **Internal IDs**: Sequential integers (not exposed) - **Encrypted IDs**: 22-character alphanumeric strings - **Prefixed IDs**: Resource-type prefixes in API responses (`contact_<22-char-id>`)  ### ID Format  **All resource IDs follow this pattern:** ``` <resource_prefix>_<22_character_alphanumeric_string> ```  **Example:** ```json {   \"id\": \"contact_BnKjkbBBS500CoBCP0oChQ\",   \"lists\": [\"list_OcuxJHdiAvujmwQVJfd3ss\", \"list_0tOFLp5RgV7s3LNiHrjGYs\"],   \"tags\": [\"tag_UhsDkjL772Qbj5lWtT62VK\", \"tag_fL7t9lsnZ9swvx2HrtQ9wM\"] } ```  ## 📚 Resource Prefixes  | Resource | Prefix | Example | |----------|--------|---------| | Contact | `contact_` | `contact_BnKjkbBBS500CoBCP0oChQ` | | Campaign | `campaign_` | `campaign_LUE9BTxmksSmqHWbh96zsn` | | List | `list_` | `list_OcuxJHdiAvujmwQVJfd3ss` | | Tag | `tag_` | `tag_UhsDkjL772Qbj5lWtT62VK` | | Sender | `sender_` | `sender_4vK3WFhMgvOwUNyaL4QxCD` | | Template | `template_` | `template_f3lJvTEhSjKGVb5Lwc5SWS` | | Custom Field | `field_` | `field_MnuqBAG2NPLm7PZMWbjQxt` | | Webhook | `webhook_` | `webhook_9l154iiXlZoPo7vngmamee` | | Post | `post_` | `post_XyZ123aBc456DeF789GhI` | | Post Category | `post_category_` | `post_category_YzS1wOU20yw87UUHKxMzwn` | | Post Tag | `post_tag_` | `post_tag_123XyZ456AbC` | | Member | `member_` | `member_JkL012MnO345PqR678` |  ## 🎯 Best Practices  ### Error Handling - **Always check status codes**: 2xx = success, 4xx = client error, 5xx = server error - **Read error messages**: Descriptive messages help debug issues - **Handle rate limits**: Respect API rate limits for optimal performance  ### Data Validation - **Email format**: Must be valid email addresses - **Required fields**: Check documentation for mandatory fields - **Field lengths**: Respect maximum length constraints  ### Performance - **Pagination**: Use offset/limit for large datasets - **Batch operations**: Process multiple items when supported - **Caching**: Cache responses when appropriate  ## 🛠️ SDKs & Integration  Official SDKs available for: - [Golang](https://github.com/sendx/sendx-go-sdk) - [Python](https://github.com/sendx/sendx-python-sdk) - [Ruby](https://github.com/sendx/sendx-ruby-sdk) - [Java](https://github.com/sendx/sendx-java-sdk) - [PHP](https://github.com/sendx/sendx-php-sdk) - [JavaScript](https://github.com/sendx/sendx-javascript-sdk)  ## 📞 Support  Need help? Contact us: - 💬 **Website Chat**: Available on sendx.io - 📧 **Email**: hello@sendx.io - 📚 **Documentation**: Full guides at help.sendx.io  ---  **API Endpoint:** `https://api.sendx.io/api/v1/rest`  [<img src=\"https://run.pstmn.io/button.svg\" alt=\"Run In Postman\" style=\"width: 128px; height: 32px;\">](https://god.gw.postman.com/run-collection/33476323-44b198b0-5219-4619-a01f-cfc24d573885?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D33476323-44b198b0-5219-4619-a01f-cfc24d573885%26entityType%3Dcollection%26workspaceId%3D6b1e4f65-96a9-4136-9512-6266c852517e)
  *
  * The version of the OpenAPI document: 1.0.0
- * Contact: support@sendx.io
+ * Contact: hello@sendx.io
  * Generated by: https://openapi-generator.tech
- * Generator version: 7.8.0
+ * Generator version: 7.13.0
  */
 
 /**
@@ -58,13 +58,13 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
       * @var string[]
       */
     protected static $openAPITypes = [
+        'email' => 'string',
         'first_name' => 'string',
         'last_name' => 'string',
-        'email' => 'string',
-        'new_email' => 'string',
         'company' => 'string',
+        'custom_fields' => 'array<string,string>',
         'tags' => 'string[]',
-        'custom_fields' => 'array<string,string>'
+        'new_email' => 'string'
     ];
 
     /**
@@ -75,13 +75,13 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
       * @psalm-var array<string, string|null>
       */
     protected static $openAPIFormats = [
+        'email' => 'email',
         'first_name' => null,
         'last_name' => null,
-        'email' => null,
-        'new_email' => null,
         'company' => null,
+        'custom_fields' => null,
         'tags' => null,
-        'custom_fields' => null
+        'new_email' => 'email'
     ];
 
     /**
@@ -90,13 +90,13 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
       * @var boolean[]
       */
     protected static array $openAPINullables = [
+        'email' => false,
         'first_name' => false,
         'last_name' => false,
-        'email' => false,
-        'new_email' => false,
         'company' => false,
+        'custom_fields' => false,
         'tags' => false,
-        'custom_fields' => false
+        'new_email' => false
     ];
 
     /**
@@ -185,13 +185,13 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
      * @var string[]
      */
     protected static $attributeMap = [
+        'email' => 'email',
         'first_name' => 'firstName',
         'last_name' => 'lastName',
-        'email' => 'email',
-        'new_email' => 'newEmail',
         'company' => 'company',
+        'custom_fields' => 'customFields',
         'tags' => 'tags',
-        'custom_fields' => 'customFields'
+        'new_email' => 'newEmail'
     ];
 
     /**
@@ -200,13 +200,13 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
      * @var string[]
      */
     protected static $setters = [
+        'email' => 'setEmail',
         'first_name' => 'setFirstName',
         'last_name' => 'setLastName',
-        'email' => 'setEmail',
-        'new_email' => 'setNewEmail',
         'company' => 'setCompany',
+        'custom_fields' => 'setCustomFields',
         'tags' => 'setTags',
-        'custom_fields' => 'setCustomFields'
+        'new_email' => 'setNewEmail'
     ];
 
     /**
@@ -215,13 +215,13 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
      * @var string[]
      */
     protected static $getters = [
+        'email' => 'getEmail',
         'first_name' => 'getFirstName',
         'last_name' => 'getLastName',
-        'email' => 'getEmail',
-        'new_email' => 'getNewEmail',
         'company' => 'getCompany',
+        'custom_fields' => 'getCustomFields',
         'tags' => 'getTags',
-        'custom_fields' => 'getCustomFields'
+        'new_email' => 'getNewEmail'
     ];
 
     /**
@@ -276,18 +276,18 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Constructor
      *
-     * @param mixed[] $data Associated array of property values
+     * @param mixed[]|null $data Associated array of property values
      *                      initializing the model
      */
-    public function __construct(array $data = null)
+    public function __construct(?array $data = null)
     {
+        $this->setIfExists('email', $data ?? [], null);
         $this->setIfExists('first_name', $data ?? [], null);
         $this->setIfExists('last_name', $data ?? [], null);
-        $this->setIfExists('email', $data ?? [], null);
-        $this->setIfExists('new_email', $data ?? [], null);
         $this->setIfExists('company', $data ?? [], null);
-        $this->setIfExists('tags', $data ?? [], null);
         $this->setIfExists('custom_fields', $data ?? [], null);
+        $this->setIfExists('tags', $data ?? [], null);
+        $this->setIfExists('new_email', $data ?? [], null);
     }
 
     /**
@@ -336,6 +336,33 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
 
 
     /**
+     * Gets email
+     *
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->container['email'];
+    }
+
+    /**
+     * Sets email
+     *
+     * @param string $email email
+     *
+     * @return self
+     */
+    public function setEmail($email)
+    {
+        if (is_null($email)) {
+            throw new \InvalidArgumentException('non-nullable email cannot be null');
+        }
+        $this->container['email'] = $email;
+
+        return $this;
+    }
+
+    /**
      * Gets first_name
      *
      * @return string|null
@@ -348,7 +375,7 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets first_name
      *
-     * @param string|null $first_name First name of the contact.
+     * @param string|null $first_name first_name
      *
      * @return self
      */
@@ -375,7 +402,7 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets last_name
      *
-     * @param string|null $last_name Last name of the contact.
+     * @param string|null $last_name last_name
      *
      * @return self
      */
@@ -385,60 +412,6 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
             throw new \InvalidArgumentException('non-nullable last_name cannot be null');
         }
         $this->container['last_name'] = $last_name;
-
-        return $this;
-    }
-
-    /**
-     * Gets email
-     *
-     * @return string
-     */
-    public function getEmail()
-    {
-        return $this->container['email'];
-    }
-
-    /**
-     * Sets email
-     *
-     * @param string $email Email address of the contact.
-     *
-     * @return self
-     */
-    public function setEmail($email)
-    {
-        if (is_null($email)) {
-            throw new \InvalidArgumentException('non-nullable email cannot be null');
-        }
-        $this->container['email'] = $email;
-
-        return $this;
-    }
-
-    /**
-     * Gets new_email
-     *
-     * @return string|null
-     */
-    public function getNewEmail()
-    {
-        return $this->container['new_email'];
-    }
-
-    /**
-     * Sets new_email
-     *
-     * @param string|null $new_email New email address of the contact.
-     *
-     * @return self
-     */
-    public function setNewEmail($new_email)
-    {
-        if (is_null($new_email)) {
-            throw new \InvalidArgumentException('non-nullable new_email cannot be null');
-        }
-        $this->container['new_email'] = $new_email;
 
         return $this;
     }
@@ -456,7 +429,7 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets company
      *
-     * @param string|null $company Company of the contact.
+     * @param string|null $company company
      *
      * @return self
      */
@@ -466,6 +439,33 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
             throw new \InvalidArgumentException('non-nullable company cannot be null');
         }
         $this->container['company'] = $company;
+
+        return $this;
+    }
+
+    /**
+     * Gets custom_fields
+     *
+     * @return array<string,string>|null
+     */
+    public function getCustomFields()
+    {
+        return $this->container['custom_fields'];
+    }
+
+    /**
+     * Sets custom_fields
+     *
+     * @param array<string,string>|null $custom_fields custom_fields
+     *
+     * @return self
+     */
+    public function setCustomFields($custom_fields)
+    {
+        if (is_null($custom_fields)) {
+            throw new \InvalidArgumentException('non-nullable custom_fields cannot be null');
+        }
+        $this->container['custom_fields'] = $custom_fields;
 
         return $this;
     }
@@ -498,28 +498,28 @@ class IdentifyRequest implements ModelInterface, ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Gets custom_fields
+     * Gets new_email
      *
-     * @return array<string,string>|null
+     * @return string|null
      */
-    public function getCustomFields()
+    public function getNewEmail()
     {
-        return $this->container['custom_fields'];
+        return $this->container['new_email'];
     }
 
     /**
-     * Sets custom_fields
+     * Sets new_email
      *
-     * @param array<string,string>|null $custom_fields custom_fields
+     * @param string|null $new_email New email when updating existing contact
      *
      * @return self
      */
-    public function setCustomFields($custom_fields)
+    public function setNewEmail($new_email)
     {
-        if (is_null($custom_fields)) {
-            throw new \InvalidArgumentException('non-nullable custom_fields cannot be null');
+        if (is_null($new_email)) {
+            throw new \InvalidArgumentException('non-nullable new_email cannot be null');
         }
-        $this->container['custom_fields'] = $custom_fields;
+        $this->container['new_email'] = $new_email;
 
         return $this;
     }

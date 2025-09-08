@@ -1,7 +1,7 @@
 <?php
 /**
  * SenderApi
- * PHP version 7.4
+ * PHP version 8.1
  *
  * @category Class
  * @package  sendx
@@ -12,12 +12,12 @@
 /**
  * SendX REST API
  *
- * # Introduction SendX is an email marketing product. It helps you convert website visitors to customers, send them promotional emails, engage with them using drip sequences and craft custom journeys using powerful but simple automations. The SendX API is organized around REST. Our API has predictable resource-oriented URLs, accepts form-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs. The SendX Rest API doesn’t support bulk updates. You can work on only one object per request. <br>
+ * # SendX REST API Documentation  ## 🚀 Introduction  The SendX API is organized around REST principles. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.  **Key Features:** - 🔒 **Security**: Team-based authentication with optional member-level access - 🎯 **Resource-Oriented**: RESTful design with clear resource boundaries - 📊 **Rich Data Models**: Three-layer model system (Input/Output/Internal) - 🔗 **Relationships**: Automatic prefix handling for resource relationships - 📈 **Scalable**: Built for high-volume email marketing operations  ## 🏗️ Architecture Overview  SendX uses a three-layer model architecture:  1. **Input Models** (`RestE*`): For API requests 2. **Output Models** (`RestR*`): For API responses with prefixed IDs 3. **Internal Models**: Core business logic (not exposed in API)  ## 🔐 Security & Authentication  SendX uses API key authentication:  ### Team API Key ```http X-Team-ApiKey: YOUR_TEAM_API_KEY ``` - **Required for all requests** - Team-level access to resources - Available in SendX Settings → Team API Key  ## 🆔 Encrypted ID System  SendX uses encrypted IDs for security and better developer experience:  - **Internal IDs**: Sequential integers (not exposed) - **Encrypted IDs**: 22-character alphanumeric strings - **Prefixed IDs**: Resource-type prefixes in API responses (`contact_<22-char-id>`)  ### ID Format  **All resource IDs follow this pattern:** ``` <resource_prefix>_<22_character_alphanumeric_string> ```  **Example:** ```json {   \"id\": \"contact_BnKjkbBBS500CoBCP0oChQ\",   \"lists\": [\"list_OcuxJHdiAvujmwQVJfd3ss\", \"list_0tOFLp5RgV7s3LNiHrjGYs\"],   \"tags\": [\"tag_UhsDkjL772Qbj5lWtT62VK\", \"tag_fL7t9lsnZ9swvx2HrtQ9wM\"] } ```  ## 📚 Resource Prefixes  | Resource | Prefix | Example | |----------|--------|---------| | Contact | `contact_` | `contact_BnKjkbBBS500CoBCP0oChQ` | | Campaign | `campaign_` | `campaign_LUE9BTxmksSmqHWbh96zsn` | | List | `list_` | `list_OcuxJHdiAvujmwQVJfd3ss` | | Tag | `tag_` | `tag_UhsDkjL772Qbj5lWtT62VK` | | Sender | `sender_` | `sender_4vK3WFhMgvOwUNyaL4QxCD` | | Template | `template_` | `template_f3lJvTEhSjKGVb5Lwc5SWS` | | Custom Field | `field_` | `field_MnuqBAG2NPLm7PZMWbjQxt` | | Webhook | `webhook_` | `webhook_9l154iiXlZoPo7vngmamee` | | Post | `post_` | `post_XyZ123aBc456DeF789GhI` | | Post Category | `post_category_` | `post_category_YzS1wOU20yw87UUHKxMzwn` | | Post Tag | `post_tag_` | `post_tag_123XyZ456AbC` | | Member | `member_` | `member_JkL012MnO345PqR678` |  ## 🎯 Best Practices  ### Error Handling - **Always check status codes**: 2xx = success, 4xx = client error, 5xx = server error - **Read error messages**: Descriptive messages help debug issues - **Handle rate limits**: Respect API rate limits for optimal performance  ### Data Validation - **Email format**: Must be valid email addresses - **Required fields**: Check documentation for mandatory fields - **Field lengths**: Respect maximum length constraints  ### Performance - **Pagination**: Use offset/limit for large datasets - **Batch operations**: Process multiple items when supported - **Caching**: Cache responses when appropriate  ## 🛠️ SDKs & Integration  Official SDKs available for: - [Golang](https://github.com/sendx/sendx-go-sdk) - [Python](https://github.com/sendx/sendx-python-sdk) - [Ruby](https://github.com/sendx/sendx-ruby-sdk) - [Java](https://github.com/sendx/sendx-java-sdk) - [PHP](https://github.com/sendx/sendx-php-sdk) - [JavaScript](https://github.com/sendx/sendx-javascript-sdk)  ## 📞 Support  Need help? Contact us: - 💬 **Website Chat**: Available on sendx.io - 📧 **Email**: hello@sendx.io - 📚 **Documentation**: Full guides at help.sendx.io  ---  **API Endpoint:** `https://api.sendx.io/api/v1/rest`  [<img src=\"https://run.pstmn.io/button.svg\" alt=\"Run In Postman\" style=\"width: 128px; height: 32px;\">](https://god.gw.postman.com/run-collection/33476323-44b198b0-5219-4619-a01f-cfc24d573885?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D33476323-44b198b0-5219-4619-a01f-cfc24d573885%26entityType%3Dcollection%26workspaceId%3D6b1e4f65-96a9-4136-9512-6266c852517e)
  *
  * The version of the OpenAPI document: 1.0.0
- * Contact: support@sendx.io
+ * Contact: hello@sendx.io
  * Generated by: https://openapi-generator.tech
- * Generator version: 7.8.0
+ * Generator version: 7.13.0
  */
 
 /**
@@ -35,8 +35,11 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\MultipartStream;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use sendx\ApiException;
 use sendx\Configuration;
+use sendx\FormDataProcessor;
 use sendx\HeaderSelector;
 use sendx\ObjectSerializer;
 
@@ -87,13 +90,13 @@ class SenderApi
      * @param int             $hostIndex (Optional) host index to select the list of hosts if defined in the OpenAPI spec
      */
     public function __construct(
-        ClientInterface $client = null,
-        Configuration $config = null,
-        HeaderSelector $selector = null,
-        $hostIndex = 0
+        ?ClientInterface $client = null,
+        ?Configuration $config = null,
+        ?HeaderSelector $selector = null,
+        int $hostIndex = 0
     ) {
         $this->client = $client ?: new Client();
-        $this->config = $config ?: new Configuration();
+        $this->config = $config ?: Configuration::getDefaultConfiguration();
         $this->headerSelector = $selector ?: new HeaderSelector();
         $this->hostIndex = $hostIndex;
     }
@@ -129,36 +132,36 @@ class SenderApi
     /**
      * Operation createSender
      *
-     * Create Sender
+     * Create sender
      *
-     * @param  \sendx\model\SenderRequest $sender_request sender_request (required)
+     * @param  \sendx\model\RestESender $rest_e_sender rest_e_sender (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createSender'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\Sender
+     * @return \sendx\model\RestRSender|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function createSender($sender_request, string $contentType = self::contentTypes['createSender'][0])
+    public function createSender($rest_e_sender, string $contentType = self::contentTypes['createSender'][0])
     {
-        list($response) = $this->createSenderWithHttpInfo($sender_request, $contentType);
+        list($response) = $this->createSenderWithHttpInfo($rest_e_sender, $contentType);
         return $response;
     }
 
     /**
      * Operation createSenderWithHttpInfo
      *
-     * Create Sender
+     * Create sender
      *
-     * @param  \sendx\model\SenderRequest $sender_request (required)
+     * @param  \sendx\model\RestESender $rest_e_sender (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createSender'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\Sender, HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRSender|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function createSenderWithHttpInfo($sender_request, string $contentType = self::contentTypes['createSender'][0])
+    public function createSenderWithHttpInfo($rest_e_sender, string $contentType = self::contentTypes['createSender'][0])
     {
-        $request = $this->createSenderRequest($sender_request, $contentType);
+        $request = $this->createSenderRequest($rest_e_sender, $contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -182,6 +185,42 @@ class SenderApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 201:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRSender',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 403:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 422:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -195,75 +234,56 @@ class SenderApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\Sender' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\Sender' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\Sender', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\Sender';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRSender',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
-                case 200:
+                case 201:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\Sender',
+                        '\sendx\model\RestRSender',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 403:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 422:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -271,17 +291,17 @@ class SenderApi
     /**
      * Operation createSenderAsync
      *
-     * Create Sender
+     * Create sender
      *
-     * @param  \sendx\model\SenderRequest $sender_request (required)
+     * @param  \sendx\model\RestESender $rest_e_sender (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createSender'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createSenderAsync($sender_request, string $contentType = self::contentTypes['createSender'][0])
+    public function createSenderAsync($rest_e_sender, string $contentType = self::contentTypes['createSender'][0])
     {
-        return $this->createSenderAsyncWithHttpInfo($sender_request, $contentType)
+        return $this->createSenderAsyncWithHttpInfo($rest_e_sender, $contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -292,18 +312,18 @@ class SenderApi
     /**
      * Operation createSenderAsyncWithHttpInfo
      *
-     * Create Sender
+     * Create sender
      *
-     * @param  \sendx\model\SenderRequest $sender_request (required)
+     * @param  \sendx\model\RestESender $rest_e_sender (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createSender'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function createSenderAsyncWithHttpInfo($sender_request, string $contentType = self::contentTypes['createSender'][0])
+    public function createSenderAsyncWithHttpInfo($rest_e_sender, string $contentType = self::contentTypes['createSender'][0])
     {
-        $returnType = '\sendx\model\Sender';
-        $request = $this->createSenderRequest($sender_request, $contentType);
+        $returnType = '\sendx\model\RestRSender';
+        $request = $this->createSenderRequest($rest_e_sender, $contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -344,19 +364,19 @@ class SenderApi
     /**
      * Create request for operation 'createSender'
      *
-     * @param  \sendx\model\SenderRequest $sender_request (required)
+     * @param  \sendx\model\RestESender $rest_e_sender (required)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['createSender'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function createSenderRequest($sender_request, string $contentType = self::contentTypes['createSender'][0])
+    public function createSenderRequest($rest_e_sender, string $contentType = self::contentTypes['createSender'][0])
     {
 
-        // verify the required parameter 'sender_request' is set
-        if ($sender_request === null || (is_array($sender_request) && count($sender_request) === 0)) {
+        // verify the required parameter 'rest_e_sender' is set
+        if ($rest_e_sender === null || (is_array($rest_e_sender) && count($rest_e_sender) === 0)) {
             throw new \InvalidArgumentException(
-                'Missing the required parameter $sender_request when calling createSender'
+                'Missing the required parameter $rest_e_sender when calling createSender'
             );
         }
 
@@ -379,12 +399,12 @@ class SenderApi
         );
 
         // for model (json/xml)
-        if (isset($sender_request)) {
+        if (isset($rest_e_sender)) {
             if (stripos($headers['Content-Type'], 'application/json') !== false) {
                 # if Content-Type contains "application/json", json_encode the body
-                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($sender_request));
+                $httpBody = \GuzzleHttp\Utils::jsonEncode(ObjectSerializer::sanitizeForSerialization($rest_e_sender));
             } else {
-                $httpBody = $sender_request;
+                $httpBody = $rest_e_sender;
             }
         } elseif (count($formParams) > 0) {
             if ($multipart) {
@@ -440,40 +460,34 @@ class SenderApi
     /**
      * Operation getAllSenders
      *
-     * Get All Senders
+     * Get all senders
      *
-     * @param  int $offset Number of records to skip (optional, default to 0)
-     * @param  int $limit Maximum number of records to return (optional, default to 10)
-     * @param  string $search Search keyword to filter senders by name or email (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllSenders'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return \sendx\model\SenderResponse[]
+     * @return \sendx\model\RestRSender[]|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse
      */
-    public function getAllSenders($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllSenders'][0])
+    public function getAllSenders(string $contentType = self::contentTypes['getAllSenders'][0])
     {
-        list($response) = $this->getAllSendersWithHttpInfo($offset, $limit, $search, $contentType);
+        list($response) = $this->getAllSendersWithHttpInfo($contentType);
         return $response;
     }
 
     /**
      * Operation getAllSendersWithHttpInfo
      *
-     * Get All Senders
+     * Get all senders
      *
-     * @param  int $offset Number of records to skip (optional, default to 0)
-     * @param  int $limit Maximum number of records to return (optional, default to 10)
-     * @param  string $search Search keyword to filter senders by name or email (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllSenders'] to see the possible values for this operation
      *
      * @throws \sendx\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of \sendx\model\SenderResponse[], HTTP status code, HTTP response headers (array of strings)
+     * @return array of \sendx\model\RestRSender[]|\sendx\model\ErrorResponse|\sendx\model\ErrorResponse, HTTP status code, HTTP response headers (array of strings)
      */
-    public function getAllSendersWithHttpInfo($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllSenders'][0])
+    public function getAllSendersWithHttpInfo(string $contentType = self::contentTypes['getAllSenders'][0])
     {
-        $request = $this->getAllSendersRequest($offset, $limit, $search, $contentType);
+        $request = $this->getAllSendersRequest($contentType);
 
         try {
             $options = $this->createHttpClientOption();
@@ -497,6 +511,30 @@ class SenderApi
 
             $statusCode = $response->getStatusCode();
 
+
+            switch($statusCode) {
+                case 200:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\RestRSender[]',
+                        $request,
+                        $response,
+                    );
+                case 401:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+                case 500:
+                    return $this->handleResponseWithDataType(
+                        '\sendx\model\ErrorResponse',
+                        $request,
+                        $response,
+                    );
+            }
+
+            
+
             if ($statusCode < 200 || $statusCode > 299) {
                 throw new ApiException(
                     sprintf(
@@ -510,75 +548,40 @@ class SenderApi
                 );
             }
 
-            switch($statusCode) {
-                case 200:
-                    if ('\sendx\model\SenderResponse[]' === '\SplFileObject') {
-                        $content = $response->getBody(); //stream goes to serializer
-                    } else {
-                        $content = (string) $response->getBody();
-                        if ('\sendx\model\SenderResponse[]' !== 'string') {
-                            try {
-                                $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                            } catch (\JsonException $exception) {
-                                throw new ApiException(
-                                    sprintf(
-                                        'Error JSON decoding server response (%s)',
-                                        $request->getUri()
-                                    ),
-                                    $statusCode,
-                                    $response->getHeaders(),
-                                    $content
-                                );
-                            }
-                        }
-                    }
-
-                    return [
-                        ObjectSerializer::deserialize($content, '\sendx\model\SenderResponse[]', []),
-                        $response->getStatusCode(),
-                        $response->getHeaders()
-                    ];
-            }
-
-            $returnType = '\sendx\model\SenderResponse[]';
-            if ($returnType === '\SplFileObject') {
-                $content = $response->getBody(); //stream goes to serializer
-            } else {
-                $content = (string) $response->getBody();
-                if ($returnType !== 'string') {
-                    try {
-                        $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
-                    } catch (\JsonException $exception) {
-                        throw new ApiException(
-                            sprintf(
-                                'Error JSON decoding server response (%s)',
-                                $request->getUri()
-                            ),
-                            $statusCode,
-                            $response->getHeaders(),
-                            $content
-                        );
-                    }
-                }
-            }
-
-            return [
-                ObjectSerializer::deserialize($content, $returnType, []),
-                $response->getStatusCode(),
-                $response->getHeaders()
-            ];
-
+            return $this->handleResponseWithDataType(
+                '\sendx\model\RestRSender[]',
+                $request,
+                $response,
+            );
         } catch (ApiException $e) {
             switch ($e->getCode()) {
                 case 200:
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '\sendx\model\SenderResponse[]',
+                        '\sendx\model\RestRSender[]',
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
-                    break;
+                    throw $e;
+                case 401:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
+                case 500:
+                    $data = ObjectSerializer::deserialize(
+                        $e->getResponseBody(),
+                        '\sendx\model\ErrorResponse',
+                        $e->getResponseHeaders()
+                    );
+                    $e->setResponseObject($data);
+                    throw $e;
             }
+        
+
             throw $e;
         }
     }
@@ -586,19 +589,16 @@ class SenderApi
     /**
      * Operation getAllSendersAsync
      *
-     * Get All Senders
+     * Get all senders
      *
-     * @param  int $offset Number of records to skip (optional, default to 0)
-     * @param  int $limit Maximum number of records to return (optional, default to 10)
-     * @param  string $search Search keyword to filter senders by name or email (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllSenders'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getAllSendersAsync($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllSenders'][0])
+    public function getAllSendersAsync(string $contentType = self::contentTypes['getAllSenders'][0])
     {
-        return $this->getAllSendersAsyncWithHttpInfo($offset, $limit, $search, $contentType)
+        return $this->getAllSendersAsyncWithHttpInfo($contentType)
             ->then(
                 function ($response) {
                     return $response[0];
@@ -609,20 +609,17 @@ class SenderApi
     /**
      * Operation getAllSendersAsyncWithHttpInfo
      *
-     * Get All Senders
+     * Get all senders
      *
-     * @param  int $offset Number of records to skip (optional, default to 0)
-     * @param  int $limit Maximum number of records to return (optional, default to 10)
-     * @param  string $search Search keyword to filter senders by name or email (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllSenders'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Promise\PromiseInterface
      */
-    public function getAllSendersAsyncWithHttpInfo($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllSenders'][0])
+    public function getAllSendersAsyncWithHttpInfo(string $contentType = self::contentTypes['getAllSenders'][0])
     {
-        $returnType = '\sendx\model\SenderResponse[]';
-        $request = $this->getAllSendersRequest($offset, $limit, $search, $contentType);
+        $returnType = '\sendx\model\RestRSender[]';
+        $request = $this->getAllSendersRequest($contentType);
 
         return $this->client
             ->sendAsync($request, $this->createHttpClientOption())
@@ -663,19 +660,13 @@ class SenderApi
     /**
      * Create request for operation 'getAllSenders'
      *
-     * @param  int $offset Number of records to skip (optional, default to 0)
-     * @param  int $limit Maximum number of records to return (optional, default to 10)
-     * @param  string $search Search keyword to filter senders by name or email (optional)
      * @param  string $contentType The value for the Content-Type header. Check self::contentTypes['getAllSenders'] to see the possible values for this operation
      *
      * @throws \InvalidArgumentException
      * @return \GuzzleHttp\Psr7\Request
      */
-    public function getAllSendersRequest($offset = 0, $limit = 10, $search = null, string $contentType = self::contentTypes['getAllSenders'][0])
+    public function getAllSendersRequest(string $contentType = self::contentTypes['getAllSenders'][0])
     {
-
-
-
 
 
         $resourcePath = '/sender';
@@ -685,33 +676,6 @@ class SenderApi
         $httpBody = '';
         $multipart = false;
 
-        // query params
-        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
-            $offset,
-            'offset', // param base name
-            'integer', // openApiType
-            'form', // style
-            true, // explode
-            false // required
-        ) ?? []);
-        // query params
-        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
-            $limit,
-            'limit', // param base name
-            'integer', // openApiType
-            'form', // style
-            true, // explode
-            false // required
-        ) ?? []);
-        // query params
-        $queryParams = array_merge($queryParams, ObjectSerializer::toQueryValue(
-            $search,
-            'search', // param base name
-            'string', // openApiType
-            'form', // style
-            true, // explode
-            false // required
-        ) ?? []);
 
 
 
@@ -791,5 +755,48 @@ class SenderApi
         }
 
         return $options;
+    }
+
+    private function handleResponseWithDataType(
+        string $dataType,
+        RequestInterface $request,
+        ResponseInterface $response
+    ): array {
+        if ($dataType === '\SplFileObject') {
+            $content = $response->getBody(); //stream goes to serializer
+        } else {
+            $content = (string) $response->getBody();
+            if ($dataType !== 'string') {
+                try {
+                    $content = json_decode($content, false, 512, JSON_THROW_ON_ERROR);
+                } catch (\JsonException $exception) {
+                    throw new ApiException(
+                        sprintf(
+                            'Error JSON decoding server response (%s)',
+                            $request->getUri()
+                        ),
+                        $response->getStatusCode(),
+                        $response->getHeaders(),
+                        $content
+                    );
+                }
+            }
+        }
+
+        return [
+            ObjectSerializer::deserialize($content, $dataType, []),
+            $response->getStatusCode(),
+            $response->getHeaders()
+        ];
+    }
+
+    private function responseWithinRangeCode(
+        string $rangeCode,
+        int $statusCode
+    ): bool {
+        $left = (int) ($rangeCode[0].'00');
+        $right = (int) ($rangeCode[0].'99');
+
+        return $statusCode >= $left && $statusCode <= $right;
     }
 }
