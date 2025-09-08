@@ -303,16 +303,6 @@ Authentication schemes defined for the API:
 - **API key parameter name**: X-Team-ApiKey
 - **Location**: HTTP header
 
-
-## Tests
-
-To run the tests, use:
-
-```bash
-composer install
-vendor/bin/phpunit
-```
-
 ## Author
 
 hello@sendx.io
